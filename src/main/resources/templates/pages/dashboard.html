@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{pages/layout/fragments/head :: head('Dashboard')}">
+    <title>Dashboard — Cloud Resource Sentinel</title>
+</head>
+<body>
+    <nav th:replace="~{pages/layout/fragments/header :: header}"></nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <nav th:replace="~{pages/layout/fragments/sidebar :: sidebar}"></nav>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2 fw-bold" style="color: var(--text-primary);">Dashboard</h1>
+                </div>
+
+                <!-- Account selector + meta -->
+                <div class="card border-0 shadow-sm mb-3">
+                    <div class="card-body py-2">
+                        <div class="row g-2 align-items-center">
+                            <div class="col-md-3">
+                                <label class="form-label small mb-0 fw-semibold" style="color: var(--text-muted);">View Account</label>
+                                <select class="form-select form-select-sm" id="dashAccountSelector">
+                                    <option value="">Select account...</option>
+                                </select>
+                                <div id="noAccountsHint" style="display:none;" class="mt-1">
+                                    <small style="color: var(--text-muted);">No cached reports yet. <a href="/dashboard/analyse" style="color: var(--accent-primary); font-weight: 600;">Run a scan</a> to get started.</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center gap-2 flex-wrap mt-3" id="dashReportMeta">
+                                    <span class="badge bg-primary" id="dashAccountId" style="display:none;"></span>
+                                    <span class="badge bg-secondary" id="dashProfileName" style="display:none;"></span>
+                                    <span id="dashScanCategory" style="display:none;"></span>
+                                    <span id="dashAiStatus" style="display:none;"></span>
+                                    <span class="text-muted small" id="dashScanTimestamp"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-3 text-end mt-3">
+                                <div class="d-flex gap-1 justify-content-end">
+                                    <a href="/dashboard/summary" class="btn btn-outline-secondary fw-semibold" style="font-size:0.75rem; padding:0.25rem 0.6rem;">Summary</a>
+                                    <a href="/dashboard/compare" class="btn btn-outline-secondary fw-semibold" style="font-size:0.75rem; padding:0.25rem 0.6rem;">Compare</a>
+                                    <a href="/dashboard/stats" class="btn btn-outline-info fw-semibold" style="font-size:0.75rem; padding:0.25rem 0.6rem;">Stats</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="reportMetaSection" style="display:none;" class="mb-3">
+                    <div class="card border-0 shadow-sm"><div class="card-body py-2" style="display:none;"></div></div>
+                </div>
+
+                <!-- Diff -->
+                <div id="diffSection" style="display:none;" class="mb-3">
+                    <div class="card border-0 shadow-sm" style="border-left: 3px solid #667eea !important;">
+                        <div class="card-header bg-transparent border-0 py-2">
+                            <strong style="color: var(--text-primary);">Changes Since Last Scan</strong>
+                        </div>
+                        <div class="card-body pt-0">
+                            <p class="mb-3" id="diffNarrative" style="color: var(--text-secondary);"></p>
+                            <div class="row g-3" id="diffBody"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Insights (account-wide, above tabs — not tab-scoped) -->
+                <div id="aiInsightsSection" style="display:none;" class="mb-3">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header border-0 d-flex align-items-center justify-content-between py-2 sentinel-collapse-toggle" data-bs-toggle="collapse" data-bs-target="#collapseAi" aria-expanded="true" role="button" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                            <div>
+                                <strong>AI Insights</strong>
+                                <span class="badge bg-light text-dark ms-2" id="aiProviderBadge"></span>
+                            </div>
+                            <span class="collapse-chevron" style="font-size: 0.8rem;">&#x25B2;</span>
+                        </div>
+                        <div class="collapse show" id="collapseAi">
+                            <div class="card-body">
+                                <div class="lead mb-3" id="aiExecutiveSummary" style="color: var(--text-primary);"></div>
+
+                                <!-- AI Usage -->
+                                <div id="aiUsageCard" style="display:none;" class="mb-3">
+                                    <div class="p-3 rounded-3" style="background: var(--bg-secondary);">
+                                        <div class="d-flex align-items-center justify-content-between mb-2">
+                                            <span class="fw-semibold" style="color: var(--text-primary); font-size: 0.85rem;">AI Behind the Scenes</span>
+                                            <button class="btn btn-sm p-0" type="button" data-bs-toggle="collapse" data-bs-target="#aiUsageDetails" aria-expanded="false"
+                                                    style="font-size: 0.75rem; color: var(--accent-primary); text-decoration: none; font-weight: 600;"
+                                                    onclick="this.textContent = this.textContent.trim()==='Show details' ? 'Hide details' : 'Show details';">Show details</button>
+                                        </div>
+                                        <div class="row g-2 text-center" id="aiUsageStats"></div>
+                                        <div class="collapse mt-2" id="aiUsageDetails">
+                                            <div class="row g-2 text-center" id="aiUsageExtraStats"></div>
+                                        </div>
+                                        <div class="mt-2 py-2 px-3 rounded-3" id="aiFunFact" style="background: var(--bg-primary); display:none;">
+                                            <p class="mb-0 text-center fst-italic" style="color: var(--text-secondary); font-size: 0.8rem;" id="aiFunFactText"></p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Cost + Risk side by side -->
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <div class="p-3 rounded-3" style="background: var(--bg-secondary);">
+                                            <h6 class="fw-semibold small text-uppercase mb-2" style="color: var(--text-muted); letter-spacing: 0.04em;">Cost Narrative</h6>
+                                            <div id="aiCostNarrative" class="mb-0 small" style="color: var(--text-secondary); line-height: 1.6;"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="p-3 rounded-3" style="background: var(--bg-secondary);">
+                                            <h6 class="fw-semibold small text-uppercase mb-2" style="color: var(--text-muted); letter-spacing: 0.04em;">Risk Overview</h6>
+                                            <div id="aiRiskOverview" class="mb-0 small" style="color: var(--text-secondary); line-height: 1.6;"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Prioritised Actions -->
+                                <div id="aiActionsCard" style="display:none;" class="mb-3">
+                                    <h6 class="fw-semibold small text-uppercase mb-2" style="color: var(--text-muted); letter-spacing: 0.04em;">Prioritised Actions</h6>
+                                    <div class="table-responsive">
+                                        <table class="table table-hover table-sm mb-0">
+                                            <thead><tr><th>Resource</th><th>Type</th><th>Action</th><th>Risk</th><th>Savings</th><th>Reasoning</th></tr></thead>
+                                            <tbody id="aiActionsBody"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- Right-Sizing -->
+                                <div id="aiRightSizingCard" style="display:none;" class="mb-3">
+                                    <h6 class="fw-semibold small text-uppercase mb-2" style="color: var(--text-muted); letter-spacing: 0.04em;">Right-Sizing Recommendations</h6>
+                                    <div class="table-responsive">
+                                        <table class="table table-hover table-sm mb-0">
+                                            <thead><tr><th>Resource</th><th>Current</th><th>Recommended</th><th>Current Cost</th><th>Projected Cost</th><th>Reasoning</th></tr></thead>
+                                            <tbody id="aiRightSizingBody"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- Architecture Insights -->
+                                <div id="aiArchCard" style="display:none;">
+                                    <h6 class="fw-semibold small text-uppercase mb-2" style="color: var(--text-muted); letter-spacing: 0.04em;">Architecture Insights</h6>
+                                    <div id="aiArchBody"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Finding type tabs -->
+                <ul class="nav nav-tabs mb-3" id="findingTypeTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active fw-semibold" id="tab-all" data-bs-toggle="tab" data-bs-target="#pane-all" type="button" role="tab" aria-selected="true">
+                            All <span class="badge bg-secondary ms-1" id="tabCountAll">0</span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-semibold" id="tab-cost" data-bs-toggle="tab" data-bs-target="#pane-cost" type="button" role="tab" aria-selected="false" style="color: #ed8936;">
+                            Cost <span class="badge ms-1" style="background: #ed8936;" id="tabCountCost">0</span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-semibold" id="tab-security" data-bs-toggle="tab" data-bs-target="#pane-security" type="button" role="tab" aria-selected="false" style="color: #f56565;">
+                            Security <span class="badge ms-1" style="background: #f56565;" id="tabCountSecurity">0</span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-semibold" id="tab-governance" data-bs-toggle="tab" data-bs-target="#pane-governance" type="button" role="tab" aria-selected="false" style="color: #667eea;">
+                            Governance <span class="badge ms-1" style="background: #667eea;" id="tabCountGovernance">0</span>
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- KPI cards (tab content) -->
+                <div class="tab-content" id="findingTypeTabContent">
+                    <!-- ALL tab -->
+                    <div class="tab-pane fade show active" id="pane-all" role="tabpanel">
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-3">
+                                <a href="/dashboard/resources" class="text-decoration-none">
+                                    <div class="card h-100 border-0 shadow-sm dashboard-card" style="border-left: 3px solid #4299e1 !important;">
+                                        <div class="card-body">
+                                            <h6 class="card-subtitle mb-2 text-uppercase small fw-semibold" style="color: var(--text-muted); letter-spacing: 0.05em;">Total Resources</h6>
+                                            <h2 class="card-title display-5 mb-1 fw-bold" id="dashTotalResources" style="color: var(--text-primary);">-</h2>
+                                            <small style="color: var(--text-muted);">Across <span id="dashRegionsCount">0</span> regions</small>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <a href="/dashboard/resources" class="text-decoration-none">
+                                    <div class="card h-100 border-0 shadow-sm dashboard-card" style="border-left: 3px solid #ed8936 !important;">
+                                        <div class="card-body">
+                                            <h6 class="card-subtitle mb-2 text-uppercase small fw-semibold" style="color: var(--text-muted); letter-spacing: 0.05em;">Monthly Cost</h6>
+                                            <h2 class="card-title display-5 mb-1 fw-bold" id="dashMonthlyCost" style="color: var(--text-primary);">-</h2>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <a href="/dashboard/resources?recommendation=actionable" class="text-decoration-none" id="actionableFindingsLink"
+                                   title="All findings requiring action — includes cost, security, and governance findings (even those with $0 cost)">
+                                    <div class="card h-100 border-0 shadow-sm dashboard-card" style="border-left: 3px solid #f56565 !important;">
+                                        <div class="card-body">
+                                            <h6 class="card-subtitle mb-2 text-uppercase small fw-semibold" style="color: var(--text-muted); letter-spacing: 0.05em;">Actionable Findings</h6>
+                                            <h2 class="card-title display-5 mb-1 fw-bold" id="dashIdleCount" style="color: var(--text-primary);">-</h2>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <a href="/dashboard/resources?recommendation=savings" class="text-decoration-none"
+                                   title="Estimated monthly savings from cost-optimization findings only (idle, unused, and over-provisioned resources)">
+                                    <div class="card h-100 border-0 shadow-sm dashboard-card" style="border-left: 3px solid #48bb78 !important;">
+                                        <div class="card-body">
+                                            <h6 class="card-subtitle mb-2 text-uppercase small fw-semibold" style="color: var(--text-muted); letter-spacing: 0.05em;">Potential Savings</h6>
+                                            <h2 class="card-title display-5 mb-1 fw-bold" id="dashPotentialSavings" style="color: var(--text-primary);">-</h2>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- COST tab -->
+                    <div class="tab-pane fade" id="pane-cost" role="tabpanel">
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-3">
+                                <a href="/dashboard/resources?findingType=COST" class="text-decoration-none">
+                                    <div class="card h-100 border-0 shadow-sm dashboard-card" style="border-left: 3px solid #ed8936 !important;">
+                                        <div class="card-body">
+                                            <h6 class="card-subtitle mb-2 text-uppercase small fw-semibold" style="color: var(--text-muted); letter-spacing: 0.05em;">Cost Resources</h6>
+                                            <h2 class="card-title display-5 mb-1 fw-bold" id="dashCostTotal" style="color: var(--text-primary);">-</h2>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card h-100 border-0 shadow-sm dashboard-card" style="border-left: 3px solid #ed8936 !important;">
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle mb-2 text-uppercase small fw-semibold" style="color: var(--text-muted); letter-spacing: 0.05em;">Monthly Spend</h6>
+                                        <h2 class="card-title display-5 mb-1 fw-bold" id="dashCostSpend" style="color: var(--text-primary);">-</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card h-100 border-0 shadow-sm dashboard-card" style="border-left: 3px solid #f56565 !important;">
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle mb-2 text-uppercase small fw-semibold" style="color: var(--text-muted); letter-spacing: 0.05em;">Idle Resources</h6>
+                                        <h2 class="card-title display-5 mb-1 fw-bold" id="dashCostIdle" style="color: var(--text-primary);">-</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card h-100 border-0 shadow-sm dashboard-card" style="border-left: 3px solid #48bb78 !important;">
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle mb-2 text-uppercase small fw-semibold" style="color: var(--text-muted); letter-spacing: 0.05em;">Potential Savings</h6>
+                                        <h2 class="card-title display-5 mb-1 fw-bold" id="dashCostSavings" style="color: var(--text-primary);">-</h2>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECURITY tab -->
+                    <div class="tab-pane fade" id="pane-security" role="tabpanel">
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-3">
+                                <a href="/dashboard/resources?findingType=SECURITY" class="text-decoration-none">
+                                    <div class="card h-100 border-0 shadow-sm dashboard-card" style="border-left: 3px solid #f56565 !important;">
+                                        <div class="card-body">
+                                            <h6 class="card-subtitle mb-2 text-uppercase small fw-semibold" style="color: var(--text-muted); letter-spacing: 0.05em;">Security Findings</h6>
+                                            <h2 class="card-title display-5 mb-1 fw-bold" id="dashSecTotal" style="color: var(--text-primary);">-</h2>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card h-100 border-0 shadow-sm dashboard-card" style="border-left: 3px solid #e53e3e !important;">
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle mb-2 text-uppercase small fw-semibold" style="color: var(--text-muted); letter-spacing: 0.05em;">Actionable</h6>
+                                        <h2 class="card-title display-5 mb-1 fw-bold" id="dashSecActionable" style="color: var(--text-primary);">-</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card h-100 border-0 shadow-sm dashboard-card" style="border-left: 3px solid #dd6b20 !important;">
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle mb-2 text-uppercase small fw-semibold" style="color: var(--text-muted); letter-spacing: 0.05em;">Resource Types</h6>
+                                        <h2 class="card-title display-5 mb-1 fw-bold" id="dashSecTypes" style="color: var(--text-primary);">-</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card h-100 border-0 shadow-sm dashboard-card" style="border-left: 3px solid #d69e2e !important;">
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle mb-2 text-uppercase small fw-semibold" style="color: var(--text-muted); letter-spacing: 0.05em;">Regions Affected</h6>
+                                        <h2 class="card-title display-5 mb-1 fw-bold" id="dashSecRegions" style="color: var(--text-primary);">-</h2>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- GOVERNANCE tab -->
+                    <div class="tab-pane fade" id="pane-governance" role="tabpanel">
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-3">
+                                <a href="/dashboard/resources?findingType=GOVERNANCE" class="text-decoration-none">
+                                    <div class="card h-100 border-0 shadow-sm dashboard-card" style="border-left: 3px solid #667eea !important;">
+                                        <div class="card-body">
+                                            <h6 class="card-subtitle mb-2 text-uppercase small fw-semibold" style="color: var(--text-muted); letter-spacing: 0.05em;">Governance Findings</h6>
+                                            <h2 class="card-title display-5 mb-1 fw-bold" id="dashGovTotal" style="color: var(--text-primary);">-</h2>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card h-100 border-0 shadow-sm dashboard-card" style="border-left: 3px solid #805ad5 !important;">
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle mb-2 text-uppercase small fw-semibold" style="color: var(--text-muted); letter-spacing: 0.05em;">Actionable</h6>
+                                        <h2 class="card-title display-5 mb-1 fw-bold" id="dashGovActionable" style="color: var(--text-primary);">-</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card h-100 border-0 shadow-sm dashboard-card" style="border-left: 3px solid #4c51bf !important;">
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle mb-2 text-uppercase small fw-semibold" style="color: var(--text-muted); letter-spacing: 0.05em;">Resource Types</h6>
+                                        <h2 class="card-title display-5 mb-1 fw-bold" id="dashGovTypes" style="color: var(--text-primary);">-</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card h-100 border-0 shadow-sm dashboard-card" style="border-left: 3px solid #6b46c1 !important;">
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle mb-2 text-uppercase small fw-semibold" style="color: var(--text-muted); letter-spacing: 0.05em;">Regions Affected</h6>
+                                        <h2 class="card-title display-5 mb-1 fw-bold" id="dashGovRegions" style="color: var(--text-primary);">-</h2>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 1. Charts (collapsible, open by default) -->
+                <div id="chartsSection" style="display:none;" class="mb-3">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-transparent border-0 d-flex align-items-center justify-content-between py-2 sentinel-collapse-toggle" data-bs-toggle="collapse" data-bs-target="#collapseCharts" aria-expanded="true" role="button">
+                            <strong style="color: var(--text-primary);">Charts &amp; Distribution</strong>
+                            <span class="collapse-chevron" style="color: var(--text-muted); font-size: 0.8rem;">&#x25B2;</span>
+                        </div>
+                        <div class="collapse show" id="collapseCharts">
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-5">
+                                        <div class="card border-0 h-100" style="background: var(--bg-secondary);">
+                                            <div class="card-body d-flex align-items-center justify-content-center" style="min-height: 260px;">
+                                                <canvas id="resourceDonutChart"></canvas>
+                                            </div>
+                                            <div class="card-footer bg-transparent border-0 text-center py-1"><small class="text-muted">Resource Distribution</small></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-7">
+                                        <div class="card border-0 h-100" style="background: var(--bg-secondary);">
+                                            <div class="card-body" style="min-height: 260px;">
+                                                <canvas id="costBarChart"></canvas>
+                                            </div>
+                                            <div class="card-footer bg-transparent border-0 text-center py-1"><small class="text-muted">Cost by Resource Type</small></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row g-3 mt-1">
+                                    <div class="col-md-6">
+                                        <div class="card border-0 h-100" style="background: var(--bg-secondary);">
+                                            <div class="card-body d-flex align-items-center justify-content-center" style="min-height: 230px;">
+                                                <canvas id="recommendationDonutChart"></canvas>
+                                            </div>
+                                            <div class="card-footer bg-transparent border-0 text-center py-1"><small class="text-muted">Recommendations</small></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="card border-0 h-100" style="background: var(--bg-secondary);">
+                                            <div class="card-body" style="min-height: 230px;">
+                                                <canvas id="regionBarChart"></canvas>
+                                            </div>
+                                            <div class="card-footer bg-transparent border-0 text-center py-1"><small class="text-muted">Resources by Region</small></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Resource Breakdown (collapsible) -->
+                <div class="card border-0 shadow-sm mb-3">
+                    <div class="card-header bg-transparent border-0 d-flex align-items-center justify-content-between py-2 sentinel-collapse-toggle" data-bs-toggle="collapse" data-bs-target="#collapseBreakdown" aria-expanded="true" role="button">
+                        <strong style="color: var(--text-primary);">Resource Breakdown</strong>
+                        <span class="collapse-chevron" style="color: var(--text-muted); font-size: 0.8rem;">&#x25B2;</span>
+                    </div>
+                    <div class="collapse show" id="collapseBreakdown">
+                        <div class="card-body pt-0">
+                            <div class="row g-2" id="resourceBreakdown">
+                                <div class="col"><p class="text-muted mb-0">Run a scan to see resource breakdown</p></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Cross-Resource Correlations (collapsible) -->
+                <div id="correlationsSection" style="display:none;" class="mb-3">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header border-0 d-flex align-items-center justify-content-between py-2 sentinel-collapse-toggle" data-bs-toggle="collapse" data-bs-target="#collapseCorrelations" aria-expanded="true" role="button" style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); color: white;">
+                            <div>
+                                <strong>Cross-Resource Correlations</strong>
+                                <span class="badge bg-light text-dark ms-2" id="correlationCount"></span>
+                            </div>
+                            <span class="collapse-chevron" style="font-size: 0.8rem;">&#x25B2;</span>
+                        </div>
+                        <div class="collapse show" id="collapseCorrelations">
+                            <div class="card-body p-0">
+                                <div id="correlationsList"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-muted small mb-4" id="dashTimestampSection" style="display:none;">
+                    Analysis performed: <span id="dashTimestamp"></span>
+                </div>
+
+                <!-- Empty state -->
+                <div class="text-center my-5" id="noAnalysisMessage">
+                    <div class="card border-0 shadow-sm p-5">
+                        <div class="mb-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 100 100" opacity="0.3">
+                                <path d="M50 8 L80 24 L80 56 Q80 80 50 94 Q20 80 20 56 L20 24 Z" fill="none" stroke="currentColor" stroke-width="4"/>
+                                <path d="M38 52 L47 61 L64 40" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <h5 style="color: var(--text-primary);">No cached reports available</h5>
+                        <p class="text-muted mb-3">Run a scan from the Analyse page to generate your first report.</p>
+                        <div class="d-flex gap-2 justify-content-center">
+                            <a href="/dashboard/analyse" class="btn btn-primary">Go to Analyse</a>
+                            <a href="/dashboard/summary" class="btn btn-outline-secondary">View Summary</a>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/sentinel.js(v=1747030000)}"></script>
+    <script>
+        // Chevron toggle for collapsible sections
+        document.querySelectorAll('.sentinel-collapse-toggle').forEach(function(el) {
+            var targetId = el.getAttribute('data-bs-target');
+            if (!targetId) return;
+            var target = document.querySelector(targetId);
+            if (!target) return;
+            target.addEventListener('shown.bs.collapse', function() {
+                el.querySelector('.collapse-chevron').innerHTML = '&#x25B2;';
+            });
+            target.addEventListener('hidden.bs.collapse', function() {
+                el.querySelector('.collapse-chevron').innerHTML = '&#x25BC;';
+            });
+        });
+
+        // Finding type tab filtering — re-renders charts, breakdown, and correlations
+        window._dashActiveTab = 'all';
+        document.querySelectorAll('#findingTypeTabs button[data-bs-toggle="tab"]').forEach(function(btn) {
+            btn.addEventListener('shown.bs.tab', function() {
+                var target = btn.getAttribute('data-bs-target');
+                var ft = 'all';
+                if (target === '#pane-cost') ft = 'COST';
+                else if (target === '#pane-security') ft = 'SECURITY';
+                else if (target === '#pane-governance') ft = 'GOVERNANCE';
+                window._dashActiveTab = ft;
+
+                // Persist tab state in URL for deep linking
+                var url = new URL(window.location);
+                if (ft === 'all') { url.searchParams.delete('tab'); } else { url.searchParams.set('tab', ft.toLowerCase()); }
+                history.replaceState({}, '', url);
+
+                var allResources = window._sentinelResources || [];
+                var filtered = ft === 'all' ? allResources : allResources.filter(function(r) {
+                    return (r.finding_type || 'COST') === ft;
+                });
+
+                renderCharts(filtered);
+                populateCorrelations(filtered);
+
+                // Re-render resource breakdown with filtered data
+                var breakdownContainer = document.getElementById('resourceBreakdown');
+                if (breakdownContainer) {
+                    var typeCounts = {};
+                    filtered.forEach(function(r) { var t = r.resource_type || 'Unknown'; typeCounts[t] = (typeCounts[t] || 0) + 1; });
+                    breakdownContainer.innerHTML = '';
+                    var typeColorMap = getTypeColors();
+                    var sortedTypes = Object.keys(typeCounts).sort(function(a, b) { return typeCounts[b] - typeCounts[a]; });
+                    sortedTypes.forEach(function(type) {
+                        var color = typeColorMap[type] || '#6b7280';
+                        var encodedType = encodeURIComponent(type);
+                        var card = document.createElement('div');
+                        card.className = 'col-auto';
+                        card.innerHTML =
+                            '<a href="/dashboard/resources?type=' + encodedType + (ft !== 'all' ? '&findingType=' + ft : '') + '" class="text-decoration-none">' +
+                            '<div class="card text-center border-0 shadow-sm dashboard-card" style="border-left: 3px solid ' + color + ' !important; cursor: pointer; min-width: 100px;">' +
+                            '<div class="card-body py-3 px-3">' +
+                            '<h6 class="card-subtitle text-uppercase small fw-semibold mb-1" style="color: var(--text-muted); letter-spacing: 0.05em; font-size: 0.7rem;">' + type + '</h6>' +
+                            '<h4 class="mb-0 fw-bold" style="color: var(--text-primary);">' + typeCounts[type] + '</h4>' +
+                            '</div></div></a>';
+                        breakdownContainer.appendChild(card);
+                    });
+                    if (sortedTypes.length === 0) {
+                        breakdownContainer.innerHTML = '<div class="col"><p class="text-muted mb-0">No ' + (ft === 'all' ? '' : ft.toLowerCase() + ' ') + 'resources found</p></div>';
+                    }
+                }
+            });
+        });
+
+        function clearReportMeta() {
+            var accountEl = document.getElementById('dashAccountId');
+            var profileEl = document.getElementById('dashProfileName');
+            var aiEl = document.getElementById('dashAiStatus');
+            if (accountEl) { accountEl.textContent = ''; accountEl.style.display = 'none'; }
+            if (profileEl) { profileEl.textContent = ''; profileEl.style.display = 'none'; }
+            if (aiEl) { aiEl.innerHTML = ''; aiEl.style.display = 'none'; }
+            var ts = document.getElementById('dashScanTimestamp');
+            if (ts) ts.textContent = '';
+        }
+
+        function dashLoadReport(profileName) {
+            clearReportMeta();
+            fetch('/analyse/cached?profileName=' + encodeURIComponent(profileName))
+                .then(function(r) { if (r.status === 204) return null; return r.json(); })
+                .then(function(report) {
+                    if (report && report.analysis_response) {
+                        sessionStorage.setItem('sentinel-report', JSON.stringify(report));
+                        loadResultsFromSession();
+                        var noMsg = document.getElementById('noAnalysisMessage');
+                        if (noMsg) noMsg.style.display = 'none';
+                    } else {
+                        clearReportMeta();
+                        showToast('No report found for ' + profileName, 'info');
+                    }
+                })
+                .catch(function() { clearReportMeta(); showToast('Failed to load report'); });
+        }
+
+        function refreshDashJobs() {
+            fetch('/analyse/jobs')
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    var active = (data.jobs || []).filter(function(j) { return j.phase !== 'complete' && j.phase !== 'error' && j.phase !== 'cancelled'; });
+                    var section = document.getElementById('activeJobsSection');
+                    var list = document.getElementById('dashActiveJobsList');
+                    var countBadge = document.getElementById('dashActiveJobCount');
+                    if (active.length === 0) { if (section) section.style.display = 'none'; return; }
+                    if (section) section.style.display = '';
+                    if (countBadge) countBadge.textContent = active.length;
+                    if (list) {
+                        list.innerHTML = active.map(function(j) {
+                            return '<div class="d-flex align-items-center justify-content-between mb-1">' +
+                                '<div><strong class="small">' + esc(j.profile_name) + '</strong> <span class="text-muted small">(' + esc(j.account_id) + ')</span></div>' +
+                                '<div class="d-flex align-items-center gap-2">' +
+                                '<span class="badge bg-info small">' + esc(j.phase) + '</span>' +
+                                '<div class="progress" style="width:80px;height:5px;"><div class="progress-bar progress-bar-striped progress-bar-animated" style="width:' + j.progress + '%;"></div></div>' +
+                                '<span class="small text-muted">' + j.progress + '%</span>' +
+                                '<button class="btn btn-outline-danger btn-sm py-0 px-1 stop-job-btn" style="font-size:0.65rem;" data-job-id="' + esc(j.job_id) + '">Stop</button>' +
+                                '</div></div>';
+                        }).join('');
+                    }
+                }).catch(function() {});
+        }
+
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('stop-job-btn')) {
+                stopJob(e.target.dataset.jobId);
+            }
+        });
+        document.addEventListener('DOMContentLoaded', function() {
+            refreshDashJobs();
+            setInterval(refreshDashJobs, 3000);
+
+            // Restore tab state from URL ?tab=cost|security|governance
+            var tabParam = new URLSearchParams(window.location.search).get('tab');
+            if (tabParam) {
+                var tabMap = { cost: '#tab-cost', security: '#tab-security', governance: '#tab-governance' };
+                var tabBtn = document.querySelector(tabMap[tabParam]);
+                if (tabBtn) {
+                    var bsTab = new bootstrap.Tab(tabBtn);
+                    bsTab.show();
+                }
+            }
+
+            var selector = document.getElementById('dashAccountSelector');
+
+            function dashResolveAccountId(profileName) {
+                if (!profileName || !profileName.trim()) return 'default';
+                var parts = profileName.split('-');
+                if (parts.length >= 2) { var last = parts[parts.length - 1]; if (/^\d{12}$/.test(last)) return last; }
+                return profileName;
+            }
+
+            Promise.all([
+                fetch('/profiles').then(function(r) { return r.json(); }),
+                fetch('/analyse/cache/count').then(function(r) { return r.json(); }).catch(function() { return { by_account: {} }; })
+            ]).then(function(results) {
+                var profiles = results[0].profiles || [];
+                var cacheCounts = results[1].by_account || {};
+                var profileAccountIds = {};
+                profiles.forEach(function(p) { profileAccountIds[dashResolveAccountId(p)] = true; });
+                selector.innerHTML = '<option value="">Select account...</option>';
+                var hasAny = false;
+                profiles.forEach(function(p) {
+                    var accountId = dashResolveAccountId(p);
+                    var count = cacheCounts[accountId] || 0;
+                    if (count > 0) {
+                        var opt = document.createElement('option'); opt.value = p;
+                        opt.textContent = p + ' (' + count + ' report' + (count > 1 ? 's' : '') + ')';
+                        selector.appendChild(opt); hasAny = true;
+                    }
+                });
+                Object.keys(cacheCounts).forEach(function(acct) {
+                    if (!profileAccountIds[acct] && acct !== 'default') {
+                        var opt = document.createElement('option'); opt.value = acct;
+                        opt.textContent = acct + ' (' + cacheCounts[acct] + ' report' + (cacheCounts[acct] > 1 ? 's' : '') + ')';
+                        selector.appendChild(opt); hasAny = true;
+                    }
+                });
+                if (!hasAny) {
+                    var hint = document.getElementById('noAccountsHint');
+                    if (hint) hint.style.display = '';
+                    return;
+                }
+                var raw = sessionStorage.getItem('sentinel-report');
+                var autoProfile = null;
+                if (raw) { try { autoProfile = JSON.parse(raw).profile_name; } catch(e) {} }
+                if (autoProfile) {
+                    var opts = Array.from(selector.options).map(function(o) { return o.value; });
+                    if (opts.indexOf(autoProfile) >= 0) { selector.value = autoProfile; dashLoadReport(autoProfile); var noMsg = document.getElementById('noAnalysisMessage'); if (noMsg) noMsg.style.display = 'none'; }
+                } else if (selector.options.length > 1) {
+                    selector.selectedIndex = 1; dashLoadReport(selector.value);
+                    var noMsg = document.getElementById('noAnalysisMessage'); if (noMsg) noMsg.style.display = 'none';
+                }
+            });
+
+            selector.addEventListener('change', function() { if (this.value) dashLoadReport(this.value); });
+        });
+    </script>
+</body>
+</html>

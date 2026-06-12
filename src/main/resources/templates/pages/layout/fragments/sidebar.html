@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <nav th:fragment="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+        <div class="d-flex flex-column h-100">
+            <ul class="nav flex-column flex-grow-1 pt-3">
+                <li class="nav-item">
+                    <a class="nav-link nav-dashboard" th:href="@{/dashboard}"
+                       th:classappend="${#strings.equals(currentPath, '/dashboard') ? 'active' : ''}">
+                        <span class="nav-icon">&#x1f4ca;</span>
+                        <span>Dashboard</span>
+                        <span id="sidebarJobBadge" class="badge bg-warning text-dark ms-auto" style="display:none; font-size:0.65rem;">0</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-analyze" th:href="@{/dashboard/analyse}"
+                       th:classappend="${#strings.startsWith(currentPath, '/dashboard/analyse') ? 'active' : ''}">
+                        <span class="nav-icon">&#x1f50d;</span>
+                        <span>Analyse</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-resources" th:href="@{/dashboard/resources}"
+                       th:classappend="${#strings.startsWith(currentPath, '/dashboard/resources') ? 'active' : ''}">
+                        <span class="nav-icon">&#x1f4cb;</span>
+                        <span>Resources</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-audit" th:href="@{/dashboard/audit}"
+                       th:classappend="${#strings.startsWith(currentPath, '/dashboard/audit') ? 'active' : ''}">
+                        <span class="nav-icon">&#x1f4dc;</span>
+                        <span>Audit Trail</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-docs" th:href="@{/dashboard/docs}"
+                       th:classappend="${#strings.startsWith(currentPath, '/dashboard/docs') ? 'active' : ''}">
+                        <span class="nav-icon">&#x1f4da;</span>
+                        <span>Documentation</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-settings" th:href="@{/dashboard/settings}"
+                       th:classappend="${#strings.startsWith(currentPath, '/dashboard/settings') ? 'active' : ''}">
+                        <span class="nav-icon">&#x2699;&#xfe0f;</span>
+                        <span>Settings</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-about" th:href="@{/dashboard/about}"
+                       th:classappend="${#strings.startsWith(currentPath, '/dashboard/about') ? 'active' : ''}">
+                        <span class="nav-icon">&#x2139;&#xfe0f;</span>
+                        <span>About</span>
+                    </a>
+                </li>
+            </ul>
+            <div class="sidebar-footer mt-auto text-center p-3" style="border-top: 1px solid var(--border-color);">
+                <small style="color: var(--text-muted); font-size: 0.75rem;">
+                    Cloud Resource Sentinel v1.0
+                </small>
+            </div>
+        </div>
+    </nav>
+</body>
+</html>

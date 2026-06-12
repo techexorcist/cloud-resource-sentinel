@@ -1,0 +1,108 @@
+id: api
+title: API Reference
+sections:
+  - title: Interactive API Explorer
+    type: note
+    text: "Explore and test all endpoints interactively using the Swagger UI."
+    link: "/swagger-ui.html"
+    link_text: "Open Swagger UI"
+  - title: API Endpoints
+    type: table
+    columns: [Method, Path, Description, Response]
+    rows:
+      - [GET, /api/info, "Version information", JSON]
+      - [GET, /profiles, "List AWS profiles from ~/.aws/config", JSON]
+      - [GET, /regions, "List available AWS regions (30)", JSON]
+      - [GET, "/profiles/check?profileName=", "Check credential health for a profile", JSON]
+      - [GET, /ai/status, "Check AI provider availability and models", JSON]
+      - [GET, /ai/ollama/models, "List locally pulled Ollama models with full_scan_capable flag", JSON]
+      - [GET, /ai/health, "AI provider warmup/readiness status", JSON]
+      - [POST, /analyse, "Submit analysis job (async)", "{job_id}"]
+      - [POST, /analyse/batch, "Batch scan multiple profiles", "JSON with submitted/skipped counts"]
+      - [POST, /analyse/cancel, "Cancel a running job", JSON]
+      - [POST, /analyse/cancel-all, "Cancel all running jobs and replace executor pool", JSON]
+      - [GET, "/analyse/job?jobId=", "Poll job progress", "JSON with phase, progress, report"]
+      - [GET, /analyse/jobs, "List all jobs with capacity info", JSON]
+      - [GET, "/analyse/status?profileName=", "Check if cached report exists", JSON]
+      - [GET, "/analyse/cached?profileName=", "Get latest cached report for profile", ScanReportDto]
+      - [GET, "/analyse/reports?profileName=", "Get all reports for profile (up to 3)", "JSON array"]
+      - [GET, /analyse/compare, "Compare two reports (diff)", "JSON with added/removed/changed"]
+      - [GET, /analyse/cache/count, "Get cached report counts per account", JSON]
+      - [POST, /analyse/cache/clear, "Clear all cached reports", JSON]
+      - [GET, "/analyse/audit?limit=", "Audit trail history", JSON array]
+      - [POST, /export/csv, "Export resources as CSV", CSV file]
+      - [GET, /pricing/status, "Pricing data status and last updated", JSON]
+      - [GET, /pricing/progress, "Pricing refresh progress", JSON]
+      - [POST, /pricing/refresh, "Refresh pricing from AWS Pricing API", JSON]
+      - [GET, /settings/ai, "Get current AI settings", JSON]
+      - [POST, /settings/ai, "Update AI settings at runtime", JSON]
+      - [POST, /docs/reload, "Reload documentation from YAML files", JSON]
+  - title: Analysis Request Body
+    type: code
+    language: json
+    content: |
+      {
+        "profile_name": "my-aws-profile",
+        "regions": ["us-east-1", "eu-west-1"],
+        "enable_ai_filter": true,
+        "ai_provider": "bedrock",
+        "ai_model": "us.anthropic.claude-sonnet-4-6",
+        "scan_category": "full",
+        "credentials": null
+      }
+    details:
+      - heading: Fields
+        items:
+          - "`profile_name` — AWS profile from ~/.aws/config (optional)"
+          - "`regions` — list of regions to scan, null for all 30"
+          - "`enable_ai_filter` — enable AI-powered analysis"
+          - "`ai_provider` — \"ollama\" or \"bedrock\""
+          - "`ai_model` — specific model name (e.g. \"qwen2.5:3b\", \"us.anthropic.claude-sonnet-4-6\")"
+          - "`scan_category` — \"cost_idle\", \"security_governance\", or \"full\" (default)"
+      - heading: Authentication
+        items:
+          - "Use `profile_name` for SSO profiles"
+          - "Or provide `credentials` with access_key_id, secret_access_key, session_token"
+          - "Leave both blank to use default environment credentials"
+  - title: Supported Resource Types
+    type: badges
+    columns: 3
+    items:
+      - {badge: EC2, color: primary, text: "Instances — CPU, state, cost"}
+      - {badge: RDS, color: success, text: "Databases — CPU, state, cost"}
+      - {badge: EBS, color: warning, text: "Volumes — attachment, size, cost"}
+      - {badge: ELB, color: info, text: "Load Balancers — type, cost"}
+      - {badge: EIP, color: danger, text: "Elastic IPs — association"}
+      - {badge: NAT, color: primary, text: "NAT Gateways — traffic"}
+      - {badge: Cache, color: info, text: "ElastiCache — CPU, connections"}
+      - {badge: S3, color: warning, text: "Buckets — objects, size, access"}
+      - {badge: DDB, color: secondary, text: "DynamoDB — read/write capacity"}
+      - {badge: SQS, color: info, text: "Queues — message throughput"}
+      - {badge: SNS, color: danger, text: "Topics — subscribers, publishes"}
+      - {badge: Lambda, color: warning, text: "Functions — invocations, last invoked"}
+      - {badge: VPC, color: primary, text: "Networks — instances, subnets"}
+      - {badge: EKS, color: success, text: "Clusters — node groups, version"}
+      - {badge: ECS, color: info, text: "Clusters — services, tasks"}
+      - {badge: Aurora, color: primary, text: "DB Clusters — CPU, members"}
+      - {badge: Redshift, color: success, text: "Clusters — CPU, nodes"}
+      - {badge: IAM, color: danger, text: "Users/Roles — MFA, last used"}
+      - {badge: KMS, color: warning, text: "Keys — rotation, state"}
+      - {badge: CW, color: info, text: "Alarms + Log Groups — retention"}
+      - {badge: Trail, color: primary, text: "CloudTrail — logging status"}
+      - {badge: Secret, color: danger, text: "Secrets Manager — rotation, access"}
+      - {badge: SSM, color: success, text: "Parameter Store — type, sensitivity"}
+      - {badge: EBS Snap, color: warning, text: "EBS Snapshots — age, orphaned"}
+      - {badge: RDS Snap, color: success, text: "RDS Snapshots — age, manual"}
+      - {badge: EFS, color: info, text: "Elastic File System — size, mounts"}
+      - {badge: ECR, color: primary, text: "Container Registry — images, staleness"}
+      - {badge: CloudFront, color: danger, text: "Distributions — status"}
+      - {badge: Route 53, color: info, text: "Hosted Zones — record count"}
+      - {badge: OpenSearch, color: warning, text: "Domains — CPU, nodes"}
+      - {badge: API GW, color: primary, text: "API Gateway — request count"}
+      - {badge: Kinesis, color: info, text: "Data Streams — shards, records"}
+      - {badge: StepFn, color: success, text: "Step Functions — executions"}
+      - {badge: SageMaker, color: danger, text: "Endpoints, Notebooks — status"}
+      - {badge: Glue, color: warning, text: "Jobs, Crawlers — last run"}
+      - {badge: FSx, color: primary, text: "File Systems — capacity, lifecycle"}
+      - {badge: Transfer, color: danger, text: "Transfer Family — SFTP servers"}
+      - {badge: Beanstalk, color: success, text: "Elastic Beanstalk — health, status"}

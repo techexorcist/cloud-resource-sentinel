@@ -1,0 +1,80 @@
+id: howto
+title: How To
+type: faq
+questions:
+  - id: first-scan
+    title: "How do I run my first scan?"
+    banner: "Running Your First Scan"
+    subtitle: "Three steps to analyse your AWS infrastructure."
+    steps:
+      - {step: 1, color: primary, title: "Configure AWS credentials", text: "Go to Analyse and select an AWS profile from the dropdown, or enter credentials manually. SSO profiles from ~/.aws/config are automatically detected."}
+      - {step: 2, color: success, title: "Select regions and options", text: "Choose which AWS regions to scan. Enable AI filtering for intelligent recommendations. Select a scan category (Cost & Idle, Security, or Full)."}
+      - {step: 3, color: warning, title: "Click Analyse", text: "The scan runs asynchronously. You can navigate away — progress is tracked in the top bar. Results appear on the Dashboard when complete."}
+  - id: ai-value
+    title: "How does AI help this tool?"
+    banner: "AI-Powered Cloud Analysis"
+    subtitle: "Understanding the value AI brings to resource scanning."
+    steps:
+      - {step: 1, color: primary, title: "Beyond rule-based checks", text: "Without AI, the tool applies fixed thresholds (CPU < 5% = idle). AI goes further — it understands context. A Lambda with 0 invocations might be a cron job that runs monthly, not truly idle. AI identifies these patterns and provides nuanced reasoning per resource."}
+      - {step: 2, color: success, title: "Prioritised actions with risk assessment", text: "AI generates a prioritised action list: TERMINATE, DOWNSIZE, REVIEW, or KEEP — each with a risk level (SAFE, LOW, MEDIUM, HIGH) and estimated savings. This helps teams focus on high-impact, low-risk cleanups first."}
+      - {step: 3, color: warning, title: "Right-sizing recommendations", text: "For compute resources (EC2, RDS, ElastiCache), AI suggests specific instance type downgrades with projected cost savings. Example: 'm5.xlarge -> m5.large saves $73.00/mo based on 12% avg CPU'."}
+      - {step: 4, color: info, title: "Architecture insights and narratives", text: "AI identifies cross-resource patterns: redundant VPCs, orphaned security groups, over-provisioned clusters. Cost narrative, risk overview, and executive summary statistics are computed server-side for accuracy — the AI adds interpretive judgment about what the data means and what the team should focus on."}
+  - id: settings-guide
+    title: "How do I configure AI settings?"
+    banner: "AI Settings Guide"
+    subtitle: "Understanding temperature, top-p, and model selection."
+    steps:
+      - {step: 1, color: primary, title: "Temperature (0.0 - 1.0)", text: "Controls randomness in AI responses. Lower values (0.1-0.3) produce focused, deterministic analysis — best for cost reports where consistency matters. Higher values (0.7-1.0) produce more creative, varied responses — useful for brainstorming architecture improvements. Default: 0.3 (precise)."}
+      - {step: 2, color: success, title: "Top-P / Nucleus Sampling (0.0 - 1.0)", text: "Controls diversity of word choices. Low values (0.1-0.3) restrict output to the most likely tokens — very focused. High values (0.8-1.0) allow more diverse vocabulary. For cloud analysis, 0.9 works well — diverse enough to capture nuances but not random. Default: 0.9."}
+      - {step: 3, color: warning, title: "Model selection", text: "Larger models (Claude Sonnet, Llama 3.2) produce richer analysis with better reasoning but take longer. Smaller models (qwen2.5:3b, phi3) are faster but may miss subtleties. Use larger models for important accounts, smaller for quick checks."}
+      - {step: 4, color: info, title: "Max Tokens (Bedrock)", text: "Controls the maximum length of AI response. 4096 tokens is sufficient for most accounts (up to ~200 resources). For large accounts with 500+ resources, increase to 8192 to avoid truncated analysis."}
+  - id: resource-correlation
+    title: "How does resource correlation work?"
+    banner: "Resource Correlation Engine"
+    subtitle: "39 rules across 7 categories — finding hidden waste, risk, and drift by cross-referencing resources."
+    steps:
+      - {step: 1, color: primary, title: "What it does", text: "After all 50 scanners complete, the correlation engine runs 39 rules across 7 categories to cross-reference resources and find relationships that individual scanners can't detect. For example, an EBS volume marked 'In Use' might be attached to a stopped EC2 instance — the EBS scanner alone doesn't know the EC2 state."}
+      - {step: 2, color: danger, title: "7 correlation categories", text: "1) Attachment: EBS/EIP on stopped EC2. 2) Orphaned: RDS/EBS snapshots for deleted sources, Lambda log groups for deleted functions, unused Secrets/SSM parameters. 3) Isolated: NAT Gateways, databases (RDS/Aurora/ElastiCache/OpenSearch/Redshift/DocumentDB/Neptune/MemoryDB), EFS/FSx, SQS, Glue in regions with no running compute. 4) Load Balancer: ALB/NLB with zero healthy targets. 5) Security: orphaned ACM certs, expired certs, unassociated WAF ACLs, orphaned CloudWatch alarms, IAM users without MFA, KMS keys pending deletion, CloudTrail not logging, Shield protecting deleted resources. 6) Infrastructure: CloudFormation rollback/delete-failed stacks, DMS instances with no tasks, disabled Athena workgroups. 7) Dependency chains: abandoned SageMaker notebooks, ECR repos with no ECS/EKS, stale Route53 zones, idle Transfer Family/API Gateway/SNS/Kinesis/Step Functions/CodePipeline, Grafana workspace verification, stopped Lightsail instances/databases."}
+      - {step: 3, color: success, title: "How to use it", text: "Correlation runs automatically on every scan — no configuration needed. Correlated resources get enhanced recommendations (e.g. 'Review - Attached to Stopped Instance' instead of just 'In Use') and detailed explanations in tooltips with cost estimates and remediation steps. The full correlation documentation is in the Recommendations tab under 7 numbered sections."}
+      - {step: 4, color: info, title: "AI amplifies correlations", text: "When AI analysis is enabled, the AI sees the correlated recommendations and provides even deeper context — for example, suggesting a cleanup sequence (stop instance → snapshot volume → delete volume → release EIP) with risk assessment for each step. The correlation detail field is also exported in CSV."}
+  - id: sso-setup
+    title: "How do I configure AWS SSO profiles?"
+    banner: "AWS SSO Configuration"
+    subtitle: "Set up SSO profiles for multi-account scanning."
+    steps:
+      - {step: 1, color: primary, title: "Configure AWS CLI", text: "Run 'aws configure sso' to set up SSO profiles. This creates entries in ~/.aws/config with sso_start_url, sso_account_id, and sso_role_name."}
+      - {step: 2, color: success, title: "Login to SSO", text: "Run 'aws sso login --profile <profile-name>' to authenticate. This opens a browser for SSO login. All profiles sharing the same SSO start URL are refreshed."}
+      - {step: 3, color: warning, title: "Scan", text: "Select the SSO profile in the Analyse page dropdown. Cloud Resource Sentinel automatically detects all SSO profiles from your config."}
+  - id: multi-account
+    title: "How do I scan multiple accounts?"
+    banner: "Multi-Account Scanning"
+    subtitle: "Batch scan all your AWS accounts in one click."
+    steps:
+      - {step: 1, color: primary, title: "Configure profiles", text: "Ensure all AWS profiles are configured in ~/.aws/config. Each profile represents one account."}
+      - {step: 2, color: success, title: "Use Scan All", text: "On the Analyse page, click 'Scan All Profiles'. This submits batch jobs for every profile. 3 run concurrently, rest are queued."}
+      - {step: 3, color: warning, title: "Monitor progress", text: "The top bar shows overall batch progress. Individual job status is visible in the Running section. Reports are cached per account."}
+  - id: reports
+    title: "How do reports and caching work?"
+    banner: "Reports & Caching"
+    subtitle: "Understanding how scan results are stored and compared."
+    steps:
+      - {step: 1, color: primary, title: "Automatic caching", text: "Every completed scan is saved to disk as a JSON report. Up to 3 reports are kept per account (oldest is deleted)."}
+      - {step: 2, color: success, title: "Report comparison", text: "Use the Compare feature on the Dashboard to diff two reports. Shows added, removed, and changed resources with cost and state deltas."}
+      - {step: 3, color: warning, title: "Cache management", text: "Clear all cached reports from the Resources page. Reports are stored in ~/.cloud-sentinel/reports/."}
+  - id: security-findings
+    title: "How do I interpret Security and Governance findings?"
+    banner: "Understanding Security & Governance Findings"
+    subtitle: "What the new recommendation verbs mean and how to act on them."
+    steps:
+      - {step: 1, color: danger, title: "Security findings (7 scanners)", text: "Security findings flag access control, credential hygiene, and encryption issues. Key verbs: 'Enable MFA' (IAM users without multi-factor auth), 'Rotate Key/Secret' (KMS/Secrets Manager auto-rotation disabled), 'Enable Logging' (CloudTrail not recording), 'Expired' (ACM certificates past expiry), 'Misconfigured' (WAF with no rules, secrets stored as plain text)."}
+      - {step: 2, color: warning, title: "Governance findings (4 scanners)", text: "Governance findings flag resource hygiene and operational health. Key verbs: 'Missing Retention Policy' (CloudWatch log groups that grow forever), 'Stale' (CloudFormation stacks in rollback/failed state, CloudWatch alarms with insufficient data, SSM parameters unchanged for 180+ days), 'Exposed' (sensitive values stored as plain-text SSM parameters)."}
+      - {step: 3, color: info, title: "Severity levels", text: "Each finding carries a severity: CRITICAL (expired certs, exposed credentials), HIGH (disabled logging, missing MFA, disabled rotation), MEDIUM (stale resources, missing policies), LOW (minor issues), INFO (healthy resources). Sort by severity on the Resources page to prioritise."}
+      - {step: 4, color: success, title: "Dashboard tabs", text: "The dashboard has Cost, Security, and Governance tabs. Each tab filters charts, resource breakdown, and correlations to that finding type. AI Insights sits above the tabs and shows the full-account analysis. The Actionable Findings KPI includes all finding types — Potential Savings counts only cost findings."}
+  - id: sso-expired
+    title: "My AWS SSO session expired — how do I fix it?"
+    banner: "SSO Session Expired"
+    subtitle: "Quick fix for expired AWS SSO credentials."
+    steps:
+      - {step: 1, color: danger, title: "Symptoms", text: "Red banner 'AWS Credentials Expired'. Scans fail with credential errors. 'SsoOidc' or 'Token has expired' in error messages."}
+      - {step: 2, color: success, title: "Fix: Re-login", text: "Run 'aws sso login --profile <any-profile-name>'. This opens a browser for SSO authentication. All profiles sharing the same SSO issuer URL are automatically refreshed."}
+      - {step: 3, color: info, title: "Session info", text: "AWS SSO sessions typically last 1-12 hours. Check status with 'aws sts get-caller-identity --profile <your-profile>'. You do not need to restart Cloud Resource Sentinel."}

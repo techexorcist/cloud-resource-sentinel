@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{pages/layout/fragments/head :: head('Settings')}">
+    <title>Settings — Cloud Resource Sentinel</title>
+</head>
+<body>
+    <div th:replace="~{pages/layout/fragments/header :: header}"></div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <nav th:replace="~{pages/layout/fragments/sidebar :: sidebar}"></nav>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2 fw-bold" style="color: var(--text-primary);">Settings</h1>
+                </div>
+
+                <div class="row g-4 mb-4">
+                    <!-- Bedrock Settings -->
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-transparent border-0 d-flex align-items-center gap-2">
+                                <strong style="color: var(--text-primary);">Amazon Bedrock</strong>
+                                <span class="badge bg-success" id="bedrockStatus">checking...</span>
+                            </div>
+                            <div class="card-body d-flex flex-column">
+                                <div class="mb-3">
+                                    <label class="form-label small fw-semibold" style="color: var(--text-primary);">Enabled Models</label>
+                                    <div id="bedrockModelList"></div>
+                                    <div class="form-text">Uncheck to hide from the model dropdown in Analyse page.</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-semibold" style="color: var(--text-primary);">Default Model</label>
+                                    <select class="form-select form-select-sm" id="bedrockDefault"></select>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-4">
+                                        <label class="form-label small fw-semibold" style="color: var(--text-primary);">Temperature</label>
+                                        <input type="range" class="form-range" id="bedrockTemp" min="0" max="1" step="0.1">
+                                        <div class="d-flex justify-content-between small text-muted">
+                                            <span>Precise</span>
+                                            <span id="bedrockTempValue">0.3</span>
+                                            <span>Creative</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <label class="form-label small fw-semibold" style="color: var(--text-primary);">Top-P</label>
+                                        <input type="range" class="form-range" id="bedrockTopP" min="0" max="1" step="0.1">
+                                        <div class="d-flex justify-content-between small text-muted">
+                                            <span>Focused</span>
+                                            <span id="bedrockTopPValue">0.9</span>
+                                            <span>Diverse</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <label class="form-label small fw-semibold" style="color: var(--text-primary);">Max Tokens</label>
+                                        <select class="form-select form-select-sm" id="bedrockMaxTokens">
+                                            <option value="2048">2048</option>
+                                            <option value="4096">4096</option>
+                                            <option value="8192">8192</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mt-auto pt-3 d-flex gap-2">
+                                    <button class="btn btn-sm btn-primary fw-semibold" onclick="saveSettings()">Save</button>
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="loadSettings()">Discard</button>
+                                    <button class="btn btn-sm btn-outline-warning" onclick="revertDefaults('bedrock')">Revert to Default</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ollama Settings -->
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-transparent border-0 d-flex align-items-center gap-2">
+                                <strong style="color: var(--text-primary);">Ollama (Local)</strong>
+                                <span class="badge bg-success" id="ollamaStatus">checking...</span>
+                            </div>
+                            <div class="card-body d-flex flex-column">
+                                <div class="mb-3">
+                                    <label class="form-label small fw-semibold" style="color: var(--text-primary);">Enabled Models</label>
+                                    <div id="ollamaModelList"></div>
+                                    <div class="form-text">Models must be pulled locally via <code>ollama pull &lt;model&gt;</code> or Docker.</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-semibold" style="color: var(--text-primary);">Default Model</label>
+                                    <select class="form-select form-select-sm" id="ollamaDefault"></select>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-4">
+                                        <label class="form-label small fw-semibold" style="color: var(--text-primary);">Temperature</label>
+                                        <input type="range" class="form-range" id="ollamaTemp" min="0" max="1" step="0.1">
+                                        <div class="d-flex justify-content-between small text-muted">
+                                            <span>Precise</span>
+                                            <span id="ollamaTempValue">0.3</span>
+                                            <span>Creative</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <label class="form-label small fw-semibold" style="color: var(--text-primary);">Top-P</label>
+                                        <input type="range" class="form-range" id="ollamaTopP" min="0" max="1" step="0.1">
+                                        <div class="d-flex justify-content-between small text-muted">
+                                            <span>Focused</span>
+                                            <span id="ollamaTopPValue">0.9</span>
+                                            <span>Diverse</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <label class="form-label small fw-semibold" style="color: var(--text-primary);">Max Tokens</label>
+                                        <select class="form-select form-select-sm" id="ollamaMaxTokens">
+                                            <option value="2048">2048</option>
+                                            <option value="4096">4096</option>
+                                            <option value="8192">8192</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mt-auto pt-3 d-flex gap-2">
+                                    <button class="btn btn-sm btn-primary fw-semibold" onclick="saveSettings()">Save</button>
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="loadSettings()">Discard</button>
+                                    <button class="btn btn-sm btn-outline-warning" onclick="revertDefaults('ollama')">Revert to Default</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4 mb-4">
+                    <!-- Ollama Local Models -->
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-transparent border-0 d-flex align-items-center justify-content-between">
+                                <strong style="color: var(--text-primary);">Ollama Local Models</strong>
+                                <button class="btn btn-sm btn-outline-primary" onclick="checkOllamaModels()">Verify</button>
+                            </div>
+                            <div class="card-body">
+                                <p class="small mb-2" style="color: var(--text-muted);">Models available via <code>ollama pull &lt;model&gt;</code> (local) or <code>docker exec sentinel-ollama ollama pull &lt;model&gt;</code> (Docker)</p>
+                                <div id="ollamaLocalModels">
+                                    <span class="text-muted small">Click Verify to check...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AWS Pricing -->
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-transparent border-0">
+                                <strong style="color: var(--text-primary);">AWS Pricing Data</strong>
+                            </div>
+                            <div class="card-body">
+                                <p class="small mb-2" style="color: var(--text-muted);">Regional pricing for all 30 AWS regions</p>
+                                <p class="small mb-2" style="color: var(--text-muted);">
+                                    Last updated: <span id="pricingLastVerified" class="fw-semibold">loading...</span>
+                                </p>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-sm btn-outline-primary fw-semibold text-nowrap" id="refreshPricingBtn" onclick="refreshPricing()">
+                                        <span id="refreshPricingSpinner" class="spinner-border spinner-border-sm me-1" role="status" style="display:none;"></span>
+                                        Refresh from AWS
+                                    </button>
+                                    <div class="btn-group">
+                                        <a id="pricingDownloadLink" href="/pricing/download" class="btn btn-sm btn-outline-secondary fw-semibold text-nowrap" download>Download CSV</a>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <span class="visually-hidden">Format</span>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li><a class="dropdown-item" href="#" onclick="setPricingFormat('csv'); return false;">CSV</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="setPricingFormat('json'); return false;">JSON</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div id="pricingProgressBar" style="display:none;" class="mt-2">
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <span class="small fw-semibold" style="color: var(--text-secondary);" id="pricingProgressMsg">Connecting...</span>
+                                        <span class="small text-muted" id="pricingProgressPct">0%</span>
+                                    </div>
+                                    <div class="progress" style="height: 6px;">
+                                        <div id="pricingProgressFill" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%;"></div>
+                                    </div>
+                                </div>
+                                <div id="pricingRefreshResult" style="display:none;" class="mt-2"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Demo Data -->
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-transparent border-0">
+                                <strong style="color: var(--text-primary);">Demo Data</strong>
+                            </div>
+                            <div class="card-body">
+                                <p class="small mb-2" style="color: var(--text-muted);">Pre-baked demo reports (Demo and Demo-AI) for showcasing without AWS credentials. Cleared when you clear all cached reports.</p>
+                                <button class="btn btn-sm btn-outline-primary fw-semibold" id="reloadDemoBtn" onclick="reloadDemoReports()">
+                                    <span id="reloadDemoSpinner" class="spinner-border spinner-border-sm me-1" role="status" style="display:none;"></span>
+                                    Reload Demo Reports
+                                </button>
+                                <span id="reloadDemoStatus" class="ms-2 small" style="display:none;"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/sentinel.js(v=1747030000)}"></script>
+    <script>
+        var allModels = { bedrock: [], ollama: [] };
+        if (typeof esc !== 'function') { window.esc = function(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }; }
+        if (typeof showToast !== 'function') { window.showToast = function(m) { console.log(m); }; }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            checkProviderStatus();
+            loadSettings();
+            loadPricingStatus();
+        });
+
+        function loadPricingStatus() {
+            fetch('/pricing/status')
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    var el = document.getElementById('pricingLastVerified');
+                    if (el) el.textContent = data.last_verified || data.lastVerified || 'Never';
+                })
+                .catch(function() {});
+        }
+
+        function checkOllamaModels() {
+            var container = document.getElementById('ollamaLocalModels');
+            if (!container) return;
+            container.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Checking...';
+
+            fetch('/ai/ollama/models')
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (!data.available) {
+                        container.innerHTML = '<div class="alert alert-warning py-1 mb-0 small">Ollama not reachable. Start locally with <code>ollama serve</code> or via Docker with <code>docker-compose up -d ollama</code></div>';
+                        return;
+                    }
+                    var localNames = data.model_names || [];
+                    var configured = allModels.ollama.length > 0 ? allModels.ollama : [];
+                    var html = '<table class="table table-sm small mb-0"><thead><tr><th>Model</th><th>Status</th><th>Size</th></tr></thead><tbody>';
+                    configured.forEach(function(name) {
+                        var localModel = (data.models || []).find(function(m) {
+                            return m.name === name || m.name.startsWith(name + ':');
+                        });
+                        if (localModel) {
+                            var sizeMb = (localModel.size / 1048576).toFixed(0);
+                            html += '<tr><td>' + esc(name) + '</td><td><span class="badge bg-success">Pulled</span></td><td>' + sizeMb + ' MB</td></tr>';
+                        } else {
+                            html += '<tr><td>' + esc(name) + '</td><td><span class="badge bg-danger">Not pulled</span></td><td>-</td></tr>';
+                        }
+                    });
+                    // Show any extra local models not in config
+                    localNames.forEach(function(name) {
+                        var base = name.split(':')[0];
+                        var inConfig = configured.some(function(c) { return name === c || name.startsWith(c + ':') || c === base; });
+                        if (!inConfig) {
+                            var localModel = (data.models || []).find(function(m) { return m.name === name; });
+                            var sizeMb = localModel ? (localModel.size / 1048576).toFixed(0) : '?';
+                            html += '<tr><td>' + esc(name) + '</td><td><span class="badge bg-info">Local only</span></td><td>' + sizeMb + ' MB</td></tr>';
+                        }
+                    });
+                    html += '</tbody></table>';
+                    container.innerHTML = html;
+                })
+                .catch(function() {
+                    container.innerHTML = '<div class="alert alert-danger py-1 mb-0 small">Failed to check Ollama models</div>';
+                });
+        }
+
+        var DEFAULTS = {
+            bedrock: { temperature: 0.3, top_p: 0.9, max_tokens: 4096 },
+            ollama:  { temperature: 0.3, top_p: 0.9, max_tokens: 4096 }
+        };
+
+        function revertDefaults(provider) {
+            var d = DEFAULTS[provider];
+            if (!d) return;
+            var temp = document.getElementById(provider + 'Temp');
+            var tempVal = document.getElementById(provider + 'TempValue');
+            var topP = document.getElementById(provider + 'TopP');
+            var topPVal = document.getElementById(provider + 'TopPValue');
+            var maxTokens = document.getElementById(provider + 'MaxTokens');
+            if (temp) { temp.value = d.temperature; if (tempVal) tempVal.textContent = d.temperature; }
+            if (topP) { topP.value = d.top_p; if (topPVal) topPVal.textContent = d.top_p; }
+            if (maxTokens) maxTokens.value = String(d.max_tokens);
+            // Re-check all model checkboxes
+            var container = document.getElementById(provider + 'ModelList');
+            if (container) {
+                container.querySelectorAll('input[type="checkbox"]').forEach(function(cb) { cb.checked = true; });
+            }
+            // Reset default model to first option
+            var defaultSel = document.getElementById(provider + 'Default');
+            if (defaultSel && defaultSel.options.length > 0) defaultSel.selectedIndex = 0;
+            showToast(provider.charAt(0).toUpperCase() + provider.slice(1) + ' reverted to defaults — click Save to apply', 'info');
+        }
+
+        function setPricingFormat(fmt) {
+            var link = document.getElementById('pricingDownloadLink');
+            if (!link) return;
+            if (fmt === 'json') {
+                link.href = '/pricing/download/json';
+                link.textContent = 'Download JSON';
+            } else {
+                link.href = '/pricing/download';
+                link.textContent = 'Download CSV';
+            }
+        }
+
+        function reloadDemoReports() {
+            var btn = document.getElementById('reloadDemoBtn');
+            var spinner = document.getElementById('reloadDemoSpinner');
+            var status = document.getElementById('reloadDemoStatus');
+            if (btn) btn.disabled = true;
+            if (spinner) spinner.style.display = '';
+            fetch('/analyse/demo/reload', { method: 'POST' })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (status) {
+                        status.style.display = '';
+                        status.textContent = data.message || 'Done';
+                        status.style.color = 'green';
+                        setTimeout(function() { status.style.display = 'none'; }, 3000);
+                    }
+                    showToast('Demo reports reloaded', 'success');
+                })
+                .catch(function() { showToast('Failed to reload demo reports'); })
+                .finally(function() {
+                    if (btn) btn.disabled = false;
+                    if (spinner) spinner.style.display = 'none';
+                });
+        }
+
+        function checkProviderStatus() {
+            fetch('/ai/status')
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    var providers = data.providers || {};
+                    var bs = document.getElementById('bedrockStatus');
+                    var os = document.getElementById('ollamaStatus');
+                    if (bs) {
+                        bs.textContent = providers.bedrock && providers.bedrock.available ? 'ready' : 'unavailable';
+                        bs.className = 'badge ' + (providers.bedrock && providers.bedrock.available ? 'bg-success' : 'bg-danger');
+                    }
+                    if (os) {
+                        os.textContent = providers.ollama && providers.ollama.available ? 'ready' : 'unavailable';
+                        os.className = 'badge ' + (providers.ollama && providers.ollama.available ? 'bg-success' : 'bg-danger');
+                    }
+                    // Store all configured models from /ai/status
+                    if (providers.bedrock && providers.bedrock.models) allModels.bedrock = providers.bedrock.models;
+                    if (providers.ollama && providers.ollama.models) allModels.ollama = providers.ollama.models;
+})
+                .catch(function() {});
+        }
+
+        function loadSettings() {
+            fetch('/settings/ai')
+                .then(function(r) { return r.json(); })
+                .then(function(s) {
+                    populateModelCheckboxes('bedrock', s['bedrock.models'] || []);
+                    populateModelCheckboxes('ollama', s['ollama.models'] || []);
+                    populateDefaultSelect('bedrock', s['bedrock.models'] || [], s['bedrock.default'] || '');
+                    populateDefaultSelect('ollama', s['ollama.models'] || [], s['ollama.default'] || '');
+
+                    var bt = document.getElementById('bedrockTemp');
+                    var btv = document.getElementById('bedrockTempValue');
+                    if (bt) { bt.value = s['bedrock.temperature'] || 0.3; if (btv) btv.textContent = bt.value; }
+                    bt && bt.addEventListener('input', function() { if (btv) btv.textContent = this.value; });
+
+                    var bmt = document.getElementById('bedrockMaxTokens');
+                    if (bmt) bmt.value = String(s['bedrock.max_tokens'] || 4096);
+
+                    var ot = document.getElementById('ollamaTemp');
+                    var otv = document.getElementById('ollamaTempValue');
+                    if (ot) { ot.value = s['ollama.temperature'] || 0.3; if (otv) otv.textContent = ot.value; }
+                    ot && ot.addEventListener('input', function() { if (otv) otv.textContent = this.value; });
+
+                    var op = document.getElementById('ollamaTopP');
+                    var opv = document.getElementById('ollamaTopPValue');
+                    if (op) { op.value = s['ollama.top_p'] || 0.9; if (opv) opv.textContent = op.value; }
+                    op && op.addEventListener('input', function() { if (opv) opv.textContent = this.value; });
+
+                    var bp = document.getElementById('bedrockTopP');
+                    var bpv = document.getElementById('bedrockTopPValue');
+                    if (bp) { bp.value = s['bedrock.top_p'] || 0.9; if (bpv) bpv.textContent = bp.value; }
+                    bp && bp.addEventListener('input', function() { if (bpv) bpv.textContent = this.value; });
+
+                    var omt = document.getElementById('ollamaMaxTokens');
+                    if (omt) omt.value = String(s['ollama.max_tokens'] || 4096);
+
+                })
+                .catch(function() { showToast('Failed to load settings'); });
+        }
+
+        function populateModelCheckboxes(provider, enabledModels) {
+            var container = document.getElementById(provider + 'ModelList');
+            if (!container) return;
+            // Use allModels from /ai/status (all configured), mark enabled ones as checked
+            var configured = allModels[provider].length > 0 ? allModels[provider] : enabledModels;
+            container.innerHTML = '';
+            configured.forEach(function(model) {
+                var checked = enabledModels.indexOf(model) >= 0;
+                var id = provider + '_model_' + model.replace(/[^a-zA-Z0-9]/g, '_');
+                var div = document.createElement('div');
+                div.className = 'form-check';
+                div.innerHTML =
+                    '<input class="form-check-input" type="checkbox" id="' + id + '" value="' + esc(model) + '" ' + (checked ? 'checked' : '') + '>' +
+                    '<label class="form-check-label small" for="' + id + '" style="color: var(--text-secondary);">' + esc(model) + '</label>';
+                container.appendChild(div);
+            });
+        }
+
+        function populateDefaultSelect(provider, models, defaultModel) {
+            var sel = document.getElementById(provider + 'Default');
+            if (!sel) return;
+            sel.innerHTML = '';
+            models.forEach(function(m) {
+                var opt = document.createElement('option');
+                opt.value = m;
+                opt.textContent = m;
+                if (m === defaultModel) opt.selected = true;
+                sel.appendChild(opt);
+            });
+        }
+
+        function getCheckedModels(provider) {
+            var container = document.getElementById(provider + 'ModelList');
+            if (!container) return [];
+            var checked = [];
+            container.querySelectorAll('input[type="checkbox"]:checked').forEach(function(cb) {
+                checked.push(cb.value);
+            });
+            return checked;
+        }
+
+        function saveSettings() {
+            var btn = document.getElementById('saveSettingsBtn');
+            var status = document.getElementById('saveStatus');
+            if (btn) btn.disabled = true;
+
+            var bedrockModels = getCheckedModels('bedrock');
+            var ollamaModels = getCheckedModels('ollama');
+            if (bedrockModels.length === 0 && ollamaModels.length === 0) {
+                showToast('At least one model must be enabled');
+                if (btn) btn.disabled = false;
+                return;
+            }
+
+            var updates = {
+                'bedrock.models': bedrockModels,
+                'ollama.models': ollamaModels,
+                'bedrock.default': document.getElementById('bedrockDefault') ? document.getElementById('bedrockDefault').value : '',
+                'ollama.default': document.getElementById('ollamaDefault') ? document.getElementById('ollamaDefault').value : '',
+                'bedrock.temperature': parseFloat(document.getElementById('bedrockTemp').value),
+                'bedrock.top_p': parseFloat(document.getElementById('bedrockTopP') ? document.getElementById('bedrockTopP').value : 0.9),
+                'bedrock.max_tokens': parseInt(document.getElementById('bedrockMaxTokens').value),
+                'ollama.temperature': parseFloat(document.getElementById('ollamaTemp').value),
+                'ollama.top_p': parseFloat(document.getElementById('ollamaTopP').value),
+                'ollama.max_tokens': parseInt(document.getElementById('ollamaMaxTokens') ? document.getElementById('ollamaMaxTokens').value : 4096),
+            };
+
+            fetch('/settings/ai', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updates)
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (status) {
+                    status.style.display = '';
+                    status.textContent = 'Settings saved';
+                    status.style.color = 'green';
+                    setTimeout(function() { status.style.display = 'none'; }, 3000);
+                }
+                showToast('Settings saved', 'info');
+            })
+            .catch(function() { showToast('Failed to save settings'); })
+            .finally(function() { if (btn) btn.disabled = false; });
+        }
+    </script>
+</body>
+</html>

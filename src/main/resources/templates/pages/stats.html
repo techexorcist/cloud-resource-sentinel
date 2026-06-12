@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{pages/layout/fragments/head :: head('Stats')}">
+    <title>Stats — Cloud Resource Sentinel</title>
+</head>
+<body>
+    <div th:replace="~{pages/layout/fragments/header :: header}"></div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <nav th:replace="~{pages/layout/fragments/sidebar :: sidebar}"></nav>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2 fw-bold" style="color: var(--text-primary);">Resource Statistics</h1>
+                    <select class="form-select form-select-sm" id="statsProfile" style="width: auto; min-width: 250px;">
+                        <option value="">Select profile...</option>
+                    </select>
+                </div>
+
+                <!-- Empty State -->
+                <div id="statsEmptyState" class="text-center py-5">
+                    <div style="font-size: 2.5rem;" class="mb-3">&#x1f4ca;</div>
+                    <h5 style="color: var(--text-primary);">Select an account to view detailed statistics</h5>
+                    <p class="text-muted">Charts and breakdowns based on the latest scan report.</p>
+                </div>
+
+                <!-- Stats Content -->
+                <div id="statsContent" style="display:none;">
+                    <!-- Top-level metrics -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-2">
+                            <div class="card border-0 shadow-sm"><div class="card-body py-3 text-center">
+                                <small class="text-uppercase fw-semibold" style="color: var(--text-muted); font-size: 0.6rem;">Total Resources</small>
+                                <h3 class="fw-bold mb-0" id="statsTotalRes" style="color: var(--text-primary);">0</h3>
+                            </div></div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="card border-0 shadow-sm"><div class="card-body py-3 text-center">
+                                <small class="text-uppercase fw-semibold" style="color: var(--text-muted); font-size: 0.6rem;">Monthly Cost</small>
+                                <h3 class="fw-bold mb-0" id="statsTotalCost" style="color: var(--accent-danger);">$0</h3>
+                            </div></div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="card border-0 shadow-sm"><div class="card-body py-3 text-center">
+                                <small class="text-uppercase fw-semibold" style="color: var(--text-muted); font-size: 0.6rem;">Actionable</small>
+                                <h3 class="fw-bold mb-0" id="statsIdleCount" style="color: var(--accent-warning);">0</h3>
+                            </div></div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="card border-0 shadow-sm"><div class="card-body py-3 text-center">
+                                <small class="text-uppercase fw-semibold" style="color: var(--text-muted); font-size: 0.6rem;">Potential Savings</small>
+                                <h3 class="fw-bold mb-0" id="statsSavings" style="color: var(--accent-success);">$0</h3>
+                            </div></div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="card border-0 shadow-sm"><div class="card-body py-3 text-center">
+                                <small class="text-uppercase fw-semibold" style="color: var(--text-muted); font-size: 0.6rem;">Regions</small>
+                                <h3 class="fw-bold mb-0" id="statsRegions" style="color: var(--accent-info);">0</h3>
+                            </div></div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="card border-0 shadow-sm"><div class="card-body py-3 text-center">
+                                <small class="text-uppercase fw-semibold" style="color: var(--text-muted); font-size: 0.6rem;">Resource Types</small>
+                                <h3 class="fw-bold mb-0" id="statsTypes" style="color: var(--accent-primary);">0</h3>
+                            </div></div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row 1: Cost by Type + Resource Distribution -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-header bg-transparent border-0 py-2">
+                                    <strong class="small" style="color: var(--text-primary);">Cost by Resource Type</strong>
+                                </div>
+                                <div class="card-body" style="height: 320px;">
+                                    <canvas id="statsCostByType"></canvas>
+                                </div>
+                                <div class="card-footer bg-transparent border-0 py-2">
+                                    <small style="color: var(--text-muted);">Monthly cost breakdown by resource type. Identifies your biggest cost drivers — focus optimisation efforts here.</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-header bg-transparent border-0 py-2">
+                                    <strong class="small" style="color: var(--text-primary);">Resource Count by Type</strong>
+                                </div>
+                                <div class="card-body" style="height: 320px;">
+                                    <canvas id="statsCountByType"></canvas>
+                                </div>
+                                <div class="card-footer bg-transparent border-0 py-2">
+                                    <small style="color: var(--text-muted);">Distribution of resources across service types. High counts in a single type may indicate sprawl or lack of cleanup.</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row 2: Recommendation Breakdown + Region Distribution -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-header bg-transparent border-0 py-2">
+                                    <strong class="small" style="color: var(--text-primary);">Recommendation Breakdown</strong>
+                                </div>
+                                <div class="card-body" style="height: 320px;">
+                                    <canvas id="statsRecBreakdown"></canvas>
+                                </div>
+                                <div class="card-footer bg-transparent border-0 py-2">
+                                    <small style="color: var(--text-muted);">How resources are classified: Idle (terminate/delete), Security Action (rotate/enable/expired/exposed), Governance Action (stale/missing/misconfigured), Low Utilisation (downsize), Active (healthy).</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-header bg-transparent border-0 py-2">
+                                    <strong class="small" style="color: var(--text-primary);">Resources by Region</strong>
+                                </div>
+                                <div class="card-body" style="height: 320px;">
+                                    <canvas id="statsRegionDist"></canvas>
+                                </div>
+                                <div class="card-footer bg-transparent border-0 py-2">
+                                    <small style="color: var(--text-muted);">Geographic distribution of resources. Unexpected concentrations may indicate misconfigured deployments or forgotten test environments.</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row 3: Cost by Region + Idle Cost by Type -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-header bg-transparent border-0 py-2">
+                                    <strong class="small" style="color: var(--text-primary);">Cost by Region</strong>
+                                </div>
+                                <div class="card-body" style="height: 320px;">
+                                    <canvas id="statsCostByRegion"></canvas>
+                                </div>
+                                <div class="card-footer bg-transparent border-0 py-2">
+                                    <small style="color: var(--text-muted);">Regional cost distribution. Some regions are more expensive than others — consider consolidating workloads in cost-effective regions.</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-header bg-transparent border-0 py-2">
+                                    <strong class="small" style="color: var(--text-primary);">Idle Resource Cost by Type</strong>
+                                </div>
+                                <div class="card-body" style="height: 320px;">
+                                    <canvas id="statsIdleCostByType"></canvas>
+                                </div>
+                                <div class="card-footer bg-transparent border-0 py-2">
+                                    <small style="color: var(--text-muted);">Monthly waste from idle resources grouped by type. This is your potential savings — prioritise the biggest bars for maximum impact.</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row 4: CPU Distribution + Top 10 Costliest -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-header bg-transparent border-0 py-2">
+                                    <strong class="small" style="color: var(--text-primary);">CPU Utilisation Distribution</strong>
+                                </div>
+                                <div class="card-body" style="height: 320px;">
+                                    <canvas id="statsCpuDist"></canvas>
+                                </div>
+                                <div class="card-footer bg-transparent border-0 py-2">
+                                    <small style="color: var(--text-muted);">CPU utilisation buckets for compute resources (EC2, RDS, ElastiCache). Resources below 5% are idle; below 20% are candidates for downsizing.</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-header bg-transparent border-0 py-2">
+                                    <strong class="small" style="color: var(--text-primary);">Top 10 Costliest Resources</strong>
+                                </div>
+                                <div class="card-body" style="height: 320px;">
+                                    <canvas id="statsTopCost"></canvas>
+                                </div>
+                                <div class="card-footer bg-transparent border-0 py-2">
+                                    <small style="color: var(--text-muted);">Your most expensive individual resources. Review these first — even small percentage savings on large costs have significant impact.</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Charts Row 5: Resource Age + Cost per State -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-header bg-transparent border-0 py-2">
+                                    <strong class="small" style="color: var(--text-primary);">Resource Age Distribution</strong>
+                                </div>
+                                <div class="card-body" style="height: 320px;">
+                                    <canvas id="statsAgeDist"></canvas>
+                                </div>
+                                <div class="card-footer bg-transparent border-0 py-2">
+                                    <small style="color: var(--text-muted);">How old your resources are. Long-lived resources in dev/test environments may be forgotten and costing money unnecessarily.</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-header bg-transparent border-0 py-2">
+                                    <strong class="small" style="color: var(--text-primary);">Cost by State</strong>
+                                </div>
+                                <div class="card-body" style="height: 320px;">
+                                    <canvas id="statsCostByState"></canvas>
+                                </div>
+                                <div class="card-footer bg-transparent border-0 py-2">
+                                    <small style="color: var(--text-muted);">Monthly cost grouped by resource state. Stopped instances still incur EBS charges. Idle and unused states represent direct waste.</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row 6: Idle by Region + Cost Heatmap by Type x Region -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-header bg-transparent border-0 py-2">
+                                    <strong class="small" style="color: var(--text-primary);">Idle Resources by Region</strong>
+                                </div>
+                                <div class="card-body" style="height: 320px;">
+                                    <canvas id="statsIdleByRegion"></canvas>
+                                </div>
+                                <div class="card-footer bg-transparent border-0 py-2">
+                                    <small style="color: var(--text-muted);">Regions with the most idle resources. High idle counts in non-primary regions often indicate abandoned workloads or test environments.</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-header bg-transparent border-0 py-2">
+                                    <strong class="small" style="color: var(--text-primary);">Recommendation by Resource Type</strong>
+                                </div>
+                                <div class="card-body" style="height: 320px;">
+                                    <canvas id="statsRecByType"></canvas>
+                                </div>
+                                <div class="card-footer bg-transparent border-0 py-2">
+                                    <small style="color: var(--text-muted);">Stacked view of recommendations per resource type. Types with high idle/low-utilisation ratios should be prioritised for cleanup.</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row 7: Security & Governance -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-header bg-transparent border-0 py-2">
+                                    <strong class="small" style="color: var(--text-primary);">Finding Type Distribution</strong>
+                                </div>
+                                <div class="card-body" style="height: 320px;">
+                                    <canvas id="statsFindingTypeDist"></canvas>
+                                </div>
+                                <div class="card-footer bg-transparent border-0 py-2">
+                                    <small style="color: var(--text-muted);">Breakdown by finding classification: Cost (idle/unused resources), Security (access control, credentials, encryption), Governance (stale resources, missing policies).</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-header bg-transparent border-0 py-2">
+                                    <strong class="small" style="color: var(--text-primary);">Severity Distribution</strong>
+                                </div>
+                                <div class="card-body" style="height: 320px;">
+                                    <canvas id="statsSeverityDist"></canvas>
+                                </div>
+                                <div class="card-footer bg-transparent border-0 py-2">
+                                    <small style="color: var(--text-muted);">Urgency breakdown across all findings. CRITICAL and HIGH findings should be addressed promptly; MEDIUM findings in the next sprint; LOW/INFO are informational.</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row 8: Savings Opportunity + Active vs Idle Ratio -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-header bg-transparent border-0 py-2">
+                                    <strong class="small" style="color: var(--text-primary);">Savings Opportunity by Region</strong>
+                                </div>
+                                <div class="card-body" style="height: 320px;">
+                                    <canvas id="statsSavingsByRegion"></canvas>
+                                </div>
+                                <div class="card-footer bg-transparent border-0 py-2">
+                                    <small style="color: var(--text-muted);">Potential monthly savings from idle resources in each region. Regions with high savings are your best targets for quick wins.</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-header bg-transparent border-0 py-2">
+                                    <strong class="small" style="color: var(--text-primary);">Active vs Idle Ratio</strong>
+                                </div>
+                                <div class="card-body" style="height: 320px;">
+                                    <canvas id="statsActiveIdle"></canvas>
+                                </div>
+                                <div class="card-footer bg-transparent border-0 py-2">
+                                    <small style="color: var(--text-muted);">Overall health ratio of your infrastructure. A healthy account typically has less than 10% idle resources by count.</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script th:src="@{/js/sentinel.js(v=1747030000)}"></script>
+    <script>
+        var _statsCharts = {};
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var selector = document.getElementById('statsProfile');
+
+            Promise.all([
+                fetch('/profiles').then(function(r) { return r.json(); }),
+                fetch('/analyse/cache/count').then(function(r) { return r.json(); })
+            ]).then(function(results) {
+                var profiles = results[0].profiles || [];
+                var cacheCounts = results[1].by_account || {};
+                var profileAccountIds = {};
+                profiles.forEach(function(p) {
+                    var parts = p.split('-');
+                    var last = parts.length >= 2 ? parts[parts.length - 1] : p;
+                    var acctId = /^\d{12}$/.test(last) ? last : p;
+                    profileAccountIds[acctId] = true;
+                });
+
+                selector.innerHTML = '<option value="">Select profile...</option>';
+                profiles.forEach(function(p) {
+                    var parts = p.split('-');
+                    var last = parts.length >= 2 ? parts[parts.length - 1] : p;
+                    var count = (/^\d{12}$/.test(last) ? cacheCounts[last] : cacheCounts[p]) || 0;
+                    if (count > 0) {
+                        var opt = document.createElement('option');
+                        opt.value = p;
+                        opt.textContent = p + ' (' + count + ' report' + (count > 1 ? 's' : '') + ')';
+                        selector.appendChild(opt);
+                    }
+                });
+
+                // Manual/Named scans with cached reports
+                Object.keys(cacheCounts).forEach(function(acct) {
+                    if (!profileAccountIds[acct] && acct !== 'default') {
+                        var opt = document.createElement('option');
+                        opt.value = acct;
+                        opt.textContent = acct + ' (' + cacheCounts[acct] + ' report' + (cacheCounts[acct] > 1 ? 's' : '') + ')';
+                        selector.appendChild(opt);
+                    }
+                });
+            });
+
+            selector.addEventListener('change', function() {
+                if (this.value) loadStats(this.value);
+            });
+
+            // Auto-load from session
+            var raw = sessionStorage.getItem('sentinel-report');
+            if (raw) {
+                try {
+                    var parsed = JSON.parse(raw);
+                    if (parsed.profile_name) {
+                        setTimeout(function() {
+                            selector.value = parsed.profile_name;
+                            loadStats(parsed.profile_name);
+                        }, 500);
+                    }
+                } catch(e) {}
+            }
+        });
+
+        function loadStats(profileName) {
+            fetch('/analyse/cached?profileName=' + encodeURIComponent(profileName))
+                .then(function(r) { return r.status === 204 ? null : r.json(); })
+                .then(function(report) {
+                    if (!report || !report.analysis_response) {
+                        showToast('No report found', 'info');
+                        return;
+                    }
+                    renderStats(report.analysis_response);
+                })
+                .catch(function() { showToast('Failed to load report'); });
+        }
+
+        function renderStats(data) {
+            document.getElementById('statsEmptyState').style.display = 'none';
+            document.getElementById('statsContent').style.display = '';
+
+            var resources = data.resources || [];
+            var typeColors = getTypeColors();
+
+            // Top metrics
+            setText('statsTotalRes', data.total_resources || 0);
+            setText('statsTotalCost', '$' + (data.total_monthly_cost || 0).toFixed(2));
+            setText('statsIdleCount', data.actionable_findings_count || data.idle_resources_count || 0);
+            setText('statsSavings', '$' + (data.potential_savings || 0).toFixed(2));
+            setText('statsRegions', (data.analyzed_regions || []).length);
+            var types = {};
+            resources.forEach(function(r) { types[r.resource_type] = true; });
+            setText('statsTypes', Object.keys(types).length);
+
+            // 1. Cost by Type (bar)
+            var typeCosts = {};
+            resources.forEach(function(r) {
+                var t = r.resource_type || 'Other';
+                typeCosts[t] = (typeCosts[t] || 0) + (r.monthly_cost_usd || 0);
+            });
+            var costTypes = Object.keys(typeCosts).sort(function(a,b) { return typeCosts[b] - typeCosts[a]; });
+            renderChart('statsCostByType', 'bar', costTypes, costTypes.map(function(t) { return Math.round(typeCosts[t]*100)/100; }),
+                costTypes.map(function(t) { return typeColors[t] || '#94a3b8'; }), 'Monthly Cost ($)');
+
+            // 2. Resource Count by Type (doughnut)
+            var typeCounts = {};
+            resources.forEach(function(r) { var t = r.resource_type || 'Other'; typeCounts[t] = (typeCounts[t]||0)+1; });
+            var countTypes = Object.keys(typeCounts).sort(function(a,b) { return typeCounts[b] - typeCounts[a]; });
+            renderChart('statsCountByType', 'doughnut', countTypes, countTypes.map(function(t) { return typeCounts[t]; }),
+                countTypes.map(function(t) { return typeColors[t] || '#94a3b8'; }));
+
+            // 3. Recommendation Breakdown (doughnut)
+            var recCounts = {};
+            resources.forEach(function(r) {
+                var rec = r.recommendation || 'Unknown';
+                if (rec.includes('Idle') || rec.includes('Delete') || rec.includes('Release') || rec.includes('Empty') || rec.includes('Terminat')) rec = 'Idle / Remove';
+                else if (rec.includes('Rotate') || rec.includes('Enable') || rec.includes('Expired') || rec.includes('Exposed')) rec = 'Security Action';
+                else if (rec.includes('Stale') || rec.includes('Missing') || rec.includes('Misconfigured')) rec = 'Governance Action';
+                else if (rec.includes('Low') || rec.includes('Inactive')) rec = 'Low Utilisation';
+                else if (rec.includes('Moderate') || rec.includes('Review') || rec.includes('Restrict')) rec = 'Review';
+                else if (rec.includes('Active') || rec.includes('In Use')) rec = 'Active';
+                else if (rec.includes('Stopped')) rec = 'Stopped';
+                else if (rec.includes('Unused')) rec = 'Unused';
+                recCounts[rec] = (recCounts[rec]||0)+1;
+            });
+            var recLabels = Object.keys(recCounts);
+            var recColors = recLabels.map(function(k) {
+                if (k.includes('Idle') || k.includes('Unused')) return '#ef4444';
+                if (k.includes('Security')) return '#f56565';
+                if (k.includes('Governance')) return '#667eea';
+                if (k.includes('Low')) return '#f59e0b';
+                if (k.includes('Review')) return '#3b82f6';
+                if (k.includes('Active')) return '#10b981';
+                if (k.includes('Stopped')) return '#6b7280';
+                return '#94a3b8';
+            });
+            renderChart('statsRecBreakdown', 'doughnut', recLabels, recLabels.map(function(k) { return recCounts[k]; }), recColors);
+
+            // 4. Resources by Region (bar)
+            var regionCounts = {};
+            resources.forEach(function(r) { var reg = r.region || 'Unknown'; regionCounts[reg] = (regionCounts[reg]||0)+1; });
+            var regionLabels = Object.keys(regionCounts).sort(function(a,b) { return regionCounts[b] - regionCounts[a]; });
+            renderChart('statsRegionDist', 'bar', regionLabels, regionLabels.map(function(r) { return regionCounts[r]; }),
+                regionLabels.map(function() { return '#2563eb'; }), 'Resources');
+
+            // 5. Cost by Region (bar)
+            var regionCosts = {};
+            resources.forEach(function(r) { var reg = r.region || 'Unknown'; regionCosts[reg] = (regionCosts[reg]||0) + (r.monthly_cost_usd||0); });
+            var costRegions = Object.keys(regionCosts).sort(function(a,b) { return regionCosts[b] - regionCosts[a]; });
+            renderChart('statsCostByRegion', 'bar', costRegions, costRegions.map(function(r) { return Math.round(regionCosts[r]*100)/100; }),
+                costRegions.map(function() { return '#ef4444'; }), 'Monthly Cost ($)');
+
+            // 6. Idle Cost by Type (bar)
+            var idleCosts = {};
+            resources.forEach(function(r) {
+                var rec = r.recommendation || '';
+                if (rec.includes('Idle') || rec.includes('Delete') || rec.includes('Release') || rec.includes('Empty') || rec.includes('Terminat') || rec.includes('Unused')) {
+                    var t = r.resource_type || 'Other';
+                    idleCosts[t] = (idleCosts[t]||0) + (r.monthly_cost_usd||0);
+                }
+            });
+            var idleTypes = Object.keys(idleCosts).sort(function(a,b) { return idleCosts[b] - idleCosts[a]; });
+            renderChart('statsIdleCostByType', 'bar', idleTypes, idleTypes.map(function(t) { return Math.round(idleCosts[t]*100)/100; }),
+                idleTypes.map(function(t) { return typeColors[t] || '#f59e0b'; }), 'Wasted $/mo');
+
+            // 7. CPU Distribution (bar - histogram)
+            var cpuBuckets = { '0%': 0, '1-5%': 0, '5-20%': 0, '20-50%': 0, '50-80%': 0, '80-100%': 0 };
+            resources.forEach(function(r) {
+                if (r.cpu_utilization_avg === undefined || r.cpu_utilization_avg === null) return;
+                var cpu = r.cpu_utilization_avg;
+                if (cpu === 0) cpuBuckets['0%']++;
+                else if (cpu < 5) cpuBuckets['1-5%']++;
+                else if (cpu < 20) cpuBuckets['5-20%']++;
+                else if (cpu < 50) cpuBuckets['20-50%']++;
+                else if (cpu < 80) cpuBuckets['50-80%']++;
+                else cpuBuckets['80-100%']++;
+            });
+            var cpuLabels = Object.keys(cpuBuckets);
+            var cpuColors = ['#ef4444', '#f97316', '#f59e0b', '#3b82f6', '#10b981', '#059669'];
+            renderChart('statsCpuDist', 'bar', cpuLabels, cpuLabels.map(function(k) { return cpuBuckets[k]; }), cpuColors, 'Resources');
+
+            // 8. Top 10 Costliest (horizontal bar)
+            var sorted = resources.slice().sort(function(a,b) { return (b.monthly_cost_usd||0) - (a.monthly_cost_usd||0); }).slice(0, 10);
+            var topLabels = sorted.map(function(r) { return (r.resource_name || r.resource_id || '').substring(0, 25); });
+            var topData = sorted.map(function(r) { return Math.round((r.monthly_cost_usd||0)*100)/100; });
+            var topColors = sorted.map(function(r) { return typeColors[r.resource_type] || '#94a3b8'; });
+            renderChart('statsTopCost', 'bar', topLabels, topData, topColors, '$/mo', true);
+
+            // 9. Resource Age Distribution (bar)
+            var now = Date.now();
+            var ageBuckets = { '< 1 month': 0, '1-3 months': 0, '3-6 months': 0, '6-12 months': 0, '1-2 years': 0, '2+ years': 0, 'Unknown': 0 };
+            resources.forEach(function(r) {
+                if (!r.created_date) { ageBuckets['Unknown']++; return; }
+                var days = Math.floor((now - new Date(r.created_date).getTime()) / 86400000);
+                if (days < 30) ageBuckets['< 1 month']++;
+                else if (days < 90) ageBuckets['1-3 months']++;
+                else if (days < 180) ageBuckets['3-6 months']++;
+                else if (days < 365) ageBuckets['6-12 months']++;
+                else if (days < 730) ageBuckets['1-2 years']++;
+                else ageBuckets['2+ years']++;
+            });
+            var ageLabels = Object.keys(ageBuckets).filter(function(k) { return ageBuckets[k] > 0; });
+            renderChart('statsAgeDist', 'bar', ageLabels, ageLabels.map(function(k) { return ageBuckets[k]; }),
+                ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#f97316', '#ef4444', '#6b7280'], 'Resources');
+
+            // 10. Cost by State (doughnut)
+            var stateCosts = {};
+            resources.forEach(function(r) {
+                var s = (r.state || 'unknown').toLowerCase();
+                stateCosts[s] = (stateCosts[s]||0) + (r.monthly_cost_usd||0);
+            });
+            var stateLabels = Object.keys(stateCosts).sort(function(a,b) { return stateCosts[b] - stateCosts[a]; });
+            var stateColors2 = stateLabels.map(function(s) {
+                if (s === 'running' || s === 'active' || s === 'available') return '#10b981';
+                if (s === 'stopped') return '#6b7280';
+                if (s === 'idle') return '#f59e0b';
+                if (s.includes('unused') || s.includes('unattach')) return '#ef4444';
+                return '#94a3b8';
+            });
+            renderChart('statsCostByState', 'doughnut', stateLabels, stateLabels.map(function(s) { return Math.round(stateCosts[s]*100)/100; }), stateColors2);
+
+            // 11. Idle Resources by Region (bar)
+            var idleByRegion = {};
+            resources.forEach(function(r) {
+                var rec = r.recommendation || '';
+                if (rec.includes('Idle') || rec.includes('Delete') || rec.includes('Release') || rec.includes('Empty') || rec.includes('Terminat') || rec.includes('Unused')) {
+                    var reg = r.region || 'Unknown';
+                    idleByRegion[reg] = (idleByRegion[reg]||0)+1;
+                }
+            });
+            var idleRegLabels = Object.keys(idleByRegion).sort(function(a,b) { return idleByRegion[b] - idleByRegion[a]; });
+            renderChart('statsIdleByRegion', 'bar', idleRegLabels, idleRegLabels.map(function(r) { return idleByRegion[r]; }),
+                idleRegLabels.map(function() { return '#f59e0b'; }), 'Idle Resources');
+
+            // 12. Recommendation by Resource Type (stacked bar)
+            renderRecByType(resources, typeColors);
+
+            // 13. Savings Opportunity by Region (bar)
+            var savingsByRegion = {};
+            resources.forEach(function(r) {
+                var rec = r.recommendation || '';
+                if (rec.includes('Idle') || rec.includes('Delete') || rec.includes('Release') || rec.includes('Empty') || rec.includes('Terminat') || rec.includes('Unused')) {
+                    var reg = r.region || 'Unknown';
+                    savingsByRegion[reg] = (savingsByRegion[reg]||0) + (r.monthly_cost_usd||0);
+                }
+            });
+            var savRegLabels = Object.keys(savingsByRegion).sort(function(a,b) { return savingsByRegion[b] - savingsByRegion[a]; });
+            renderChart('statsSavingsByRegion', 'bar', savRegLabels, savRegLabels.map(function(r) { return Math.round(savingsByRegion[r]*100)/100; }),
+                savRegLabels.map(function() { return '#10b981'; }), 'Potential Savings ($)');
+
+            // 14. Active vs Idle vs Security/Governance Ratio (doughnut)
+            var activeCount = 0, idleCount2 = 0, secCount = 0, govCount = 0, reviewCount = 0, otherCount = 0;
+            resources.forEach(function(r) {
+                var rec = r.recommendation || '';
+                if (rec.includes('Active') || rec.includes('In Use')) activeCount++;
+                else if (rec.includes('Idle') || rec.includes('Delete') || rec.includes('Release') || rec.includes('Terminat') || rec.includes('Unused') || rec.includes('Empty')) idleCount2++;
+                else if (rec.includes('Rotate') || rec.includes('Enable') || rec.includes('Expired') || rec.includes('Exposed')) secCount++;
+                else if (rec.includes('Stale') || rec.includes('Missing') || rec.includes('Misconfigured')) govCount++;
+                else if (rec.includes('Review') || rec.includes('Moderate') || rec.includes('Restrict')) reviewCount++;
+                else otherCount++;
+            });
+            renderChart('statsActiveIdle', 'doughnut',
+                ['Active', 'Idle / Unused', 'Security', 'Governance', 'Review', 'Other'],
+                [activeCount, idleCount2, secCount, govCount, reviewCount, otherCount],
+                ['#10b981', '#ef4444', '#f56565', '#667eea', '#3b82f6', '#94a3b8']);
+
+            // 15. Finding Type Distribution (doughnut)
+            var ftCounts = { COST: 0, SECURITY: 0, GOVERNANCE: 0 };
+            resources.forEach(function(r) { var ft = r.finding_type || 'COST'; ftCounts[ft] = (ftCounts[ft]||0)+1; });
+            renderChart('statsFindingTypeDist', 'doughnut',
+                ['Cost', 'Security', 'Governance'],
+                [ftCounts.COST, ftCounts.SECURITY, ftCounts.GOVERNANCE],
+                ['#ed8936', '#f56565', '#667eea']);
+
+            // 16. Severity Distribution (bar)
+            var sevCounts = { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0, INFO: 0 };
+            resources.forEach(function(r) { var sev = r.severity || 'INFO'; sevCounts[sev] = (sevCounts[sev]||0)+1; });
+            var sevLabels = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'INFO'];
+            var sevColors = ['#dc2626', '#ea580c', '#d97706', '#65a30d', '#9ca3af'];
+            renderChart('statsSeverityDist', 'bar', sevLabels,
+                sevLabels.map(function(s) { return sevCounts[s]; }), sevColors, 'Findings');
+        }
+
+        function renderChart(canvasId, type, labels, data, colors, yLabel, horizontal) {
+            var canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            if (_statsCharts[canvasId]) _statsCharts[canvasId].destroy();
+
+            var config = { type: type, data: { labels: labels } };
+
+            if (type === 'doughnut') {
+                config.data.datasets = [{ data: data, backgroundColor: colors, borderWidth: 0, hoverOffset: 6 }];
+                config.options = {
+                    responsive: true, maintainAspectRatio: false, cutout: '60%',
+                    plugins: { legend: { position: 'right', labels: { padding: 10, usePointStyle: true, pointStyle: 'circle', font: { size: 11 } } } }
+                };
+            } else {
+                config.data.datasets = [{ data: data, backgroundColor: colors, borderRadius: 4, barThickness: horizontal ? 18 : 24 }];
+                config.options = {
+                    indexAxis: horizontal ? 'y' : 'x',
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, title: horizontal ? { display: false } : { display: !!yLabel, text: yLabel || '', font: { size: 11 } }, grid: { color: 'rgba(0,0,0,0.05)' } },
+                        x: { grid: horizontal ? { color: 'rgba(0,0,0,0.05)' } : { display: false }, ticks: { font: { size: 10 } },
+                            title: horizontal ? { display: !!yLabel, text: yLabel || '', font: { size: 11 } } : { display: false } }
+                    }
+                };
+            }
+
+            _statsCharts[canvasId] = new Chart(canvas, config);
+        }
+
+        function renderRecByType(resources, typeColors) {
+            var canvas = document.getElementById('statsRecByType');
+            if (!canvas) return;
+            if (_statsCharts['statsRecByType']) _statsCharts['statsRecByType'].destroy();
+
+            // Classify recommendations
+            function classifyRec(rec) {
+                if (!rec) return 'Other';
+                if (rec.includes('Idle') || rec.includes('Delete') || rec.includes('Release') || rec.includes('Terminat') || rec.includes('Unused') || rec.includes('Empty')) return 'Idle';
+                if (rec.includes('Rotate') || rec.includes('Enable') || rec.includes('Expired') || rec.includes('Exposed')) return 'Security';
+                if (rec.includes('Stale') || rec.includes('Missing') || rec.includes('Misconfigured')) return 'Governance';
+                if (rec.includes('Low') || rec.includes('Inactive')) return 'Low';
+                if (rec.includes('Review') || rec.includes('Moderate') || rec.includes('Restrict')) return 'Review';
+                if (rec.includes('Active') || rec.includes('In Use')) return 'Active';
+                return 'Other';
+            }
+
+            var typesSet = {};
+            resources.forEach(function(r) { typesSet[r.resource_type || 'Other'] = true; });
+            var typeList = Object.keys(typesSet).sort();
+
+            var recCategories = ['Idle', 'Low', 'Review', 'Active', 'Other'];
+            var recCatColors = { 'Idle': '#ef4444', 'Low': '#f59e0b', 'Review': '#3b82f6', 'Active': '#10b981', 'Other': '#94a3b8' };
+
+            var datasets = recCategories.map(function(cat) {
+                var data = typeList.map(function(t) {
+                    return resources.filter(function(r) { return (r.resource_type || 'Other') === t && classifyRec(r.recommendation) === cat; }).length;
+                });
+                return { label: cat, data: data, backgroundColor: recCatColors[cat], borderRadius: 2 };
+            });
+
+            _statsCharts['statsRecByType'] = new Chart(canvas, {
+                type: 'bar',
+                data: { labels: typeList, datasets: datasets },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { position: 'top', labels: { usePointStyle: true, pointStyle: 'circle', font: { size: 10 } } } },
+                    scales: {
+                        x: { stacked: true, grid: { display: false }, ticks: { font: { size: 9 } } },
+                        y: { stacked: true, beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' }, title: { display: true, text: 'Resources', font: { size: 11 } } }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{pages/layout/fragments/head :: head('Resources')}">
+    <title>Resources — Cloud Resource Sentinel</title>
+</head>
+<body>
+    <nav th:replace="~{pages/layout/fragments/header :: header}"></nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <nav th:replace="~{pages/layout/fragments/sidebar :: sidebar}"></nav>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2 fw-bold" style="color: var(--text-primary);">Resource Details</h1>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-outline-danger fw-semibold" onclick="clearAllCache()">Clear Cache</button>
+                        <button class="btn btn-sm btn-outline-success fw-semibold" id="exportCsvBtn">Export CSV</button>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm mb-3">
+                    <div class="card-body py-2">
+                        <div class="row g-2 align-items-center">
+                            <div class="col-md-4">
+                                <label class="form-label small mb-0 fw-semibold" style="color: var(--text-muted);">Account</label>
+                                <select class="form-select form-select-sm" id="accountSelector">
+                                    <option value="">Loading...</option>
+                                </select>
+                                <div id="noAccountsHintRes" style="display:none;" class="mt-1">
+                                    <small style="color: var(--text-muted);">No cached reports yet. <a href="/dashboard/analyse" style="color: var(--accent-primary); font-weight: 600;">Run a scan</a> to get started.</small>
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <span class="badge bg-primary me-1" id="resAccountId"></span>
+                                <span class="badge bg-secondary me-1" id="resProfileName"></span>
+                                <span id="resAiStatus" class="me-1"></span>
+                                <span class="text-muted small" id="resScannedAt"></span>
+                            </div>
+                            <div class="col-md-3 text-end">
+                                <span class="text-muted small" id="resResourceCount"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm mb-3">
+                    <div class="card-body py-2">
+                        <div class="row g-2 align-items-center">
+                            <div class="col-md-3">
+                                <input type="text" class="form-control form-control-sm" id="resourceSearch" placeholder="Search by name or ID...">
+                            </div>
+                            <div class="col-md-2">
+                                <select class="form-select form-select-sm" id="resourceTypeFilter">
+                                    <option value="all">All Types</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <select class="form-select form-select-sm" id="resourceRegionFilter">
+                                    <option value="all">All Regions</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <select class="form-select form-select-sm" id="resourceRecommendationFilter">
+                                    <option value="all">All Recommendations</option>
+                                    <optgroup label="Status">
+                                        <option value="actionable">Actionable</option>
+                                        <option value="savings">Potential Savings</option>
+                                    </optgroup>
+                                    <optgroup label="Cost Actions">
+                                        <option value="Idle">Idle</option>
+                                        <option value="Delete">Delete / Release</option>
+                                        <option value="Stopped">Stopped</option>
+                                        <option value="Low">Low Utilisation</option>
+                                        <option value="Moderate">Moderate</option>
+                                        <option value="Active">Active</option>
+                                    </optgroup>
+                                    <optgroup label="Security / Governance">
+                                        <option value="Rotate">Rotate</option>
+                                        <option value="Enable">Enable</option>
+                                        <option value="Expired">Expired</option>
+                                        <option value="Exposed">Exposed</option>
+                                        <option value="Missing">Missing</option>
+                                        <option value="Stale">Stale</option>
+                                        <option value="Misconfigured">Misconfigured</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+                            <div class="col-md-1">
+                                <select class="form-select form-select-sm" id="findingTypeFilter">
+                                    <option value="all">All Types</option>
+                                    <option value="COST">Cost</option>
+                                    <option value="SECURITY">Security</option>
+                                    <option value="GOVERNANCE">Governance</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 text-end">
+                                <button class="btn btn-outline-secondary btn-sm" id="clearFiltersBtn" title="Clear all filters">Clear Filters</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-sm mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Region</th>
+                                        <th>Type</th>
+                                        <th title="Finding Type: Cost, Security, or Governance">Type</th>
+                                        <th style="cursor:pointer;" onclick="sortResourceTable('severity')" title="CRITICAL (red) > HIGH (orange) > MEDIUM (yellow) > LOW (green) > INFO (gray). Click to sort.">Severity <span id="sortSeverityIcon"></span></th>
+                                        <th>Name</th>
+                                        <th>ID</th>
+                                        <th>State</th>
+                                        <th style="cursor:pointer;" onclick="sortResourceTable('cost')" title="Click to sort">Monthly Cost <span id="sortCostIcon"></span></th>
+                                        <th style="cursor:pointer;" onclick="sortResourceTable('cpu')" title="Click to sort">CPU % <span id="sortCpuIcon"></span></th>
+                                        <th>Recommendation</th>
+                                        <th style="cursor:pointer;" onclick="sortResourceTable('created')" title="Click to sort">Created <span id="sortCreatedIcon"></span></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="resourceTableBody">
+                                    <tr id="emptyResourcesRow">
+                                        <td colspan="11" class="text-center py-5">
+                                            <div class="mb-3" style="font-size: 2.5rem;">📭</div>
+                                            <h5 style="color: var(--text-primary);">No cached reports available</h5>
+                                            <p class="text-muted mb-3">Run a scan from the Analyse page to generate a report. Resources from cached reports will appear here.</p>
+                                            <div class="d-flex gap-2 justify-content-center">
+                                                <a href="/dashboard/analyse" class="btn btn-primary">Go to Analyse</a>
+                                                <a href="/dashboard/summary" class="btn btn-outline-secondary">View Summary</a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/sentinel.js(v=1747030000)}"></script>
+    <script>
+        function loadResources(resources) {
+            window._sentinelResources = resources;
+
+            var typeFilter = document.getElementById('resourceTypeFilter');
+            if (typeFilter) {
+                var types = {};
+                resources.forEach(function(r) { types[r.resource_type || 'Unknown'] = true; });
+                var existing = typeFilter.value;
+                typeFilter.innerHTML = '<option value="all">All Types</option>';
+                Object.keys(types).sort().forEach(function(t) {
+                    var opt = document.createElement('option');
+                    opt.value = t;
+                    opt.textContent = t;
+                    typeFilter.appendChild(opt);
+                });
+                if (existing && existing !== 'all') typeFilter.value = existing;
+            }
+
+            // Populate region filter
+            var regionFilter = document.getElementById('resourceRegionFilter');
+            if (regionFilter) {
+                var regions = {};
+                resources.forEach(function(r) { regions[r.region || 'unknown'] = true; });
+                regionFilter.innerHTML = '<option value="all">All Regions</option>';
+                Object.keys(regions).sort().forEach(function(reg) {
+                    var opt = document.createElement('option');
+                    opt.value = reg;
+                    opt.textContent = reg;
+                    regionFilter.appendChild(opt);
+                });
+            }
+
+            // Apply URL params as initial filters
+            var params = new URLSearchParams(window.location.search);
+            var typeParam = params.get('type');
+            var recParam = params.get('recommendation');
+            var regionParam = params.get('region');
+            var findingParam = params.get('findingType');
+
+            if (typeParam && typeFilter) typeFilter.value = typeParam;
+            if (recParam) {
+                var recFilter = document.getElementById('resourceRecommendationFilter');
+                if (recFilter) recFilter.value = recParam;
+            }
+            if (regionParam && regionFilter) regionFilter.value = regionParam;
+            if (findingParam) {
+                var ftFilter = document.getElementById('findingTypeFilter');
+                if (ftFilter) ftFilter.value = findingParam;
+            }
+
+            if (typeParam || recParam || regionParam || findingParam) {
+                // Trigger filter application
+                var evt = new Event('change');
+                if (findingParam) {
+                    document.getElementById('findingTypeFilter').dispatchEvent(evt);
+                } else if (recParam) {
+                    document.getElementById('resourceRecommendationFilter').dispatchEvent(evt);
+                } else if (typeParam) {
+                    typeFilter.dispatchEvent(evt);
+                } else {
+                    regionFilter.dispatchEvent(evt);
+                }
+            } else {
+                renderResourceTable(resources);
+            }
+        }
+
+        function showReportMeta(report) {
+            if (!report) return;
+            setText('resAccountId', report.account_id || '');
+            setText('resProfileName', report.profile_name || '');
+            var ts = report.scanned_at ? new Date(report.scanned_at).toLocaleString() : '';
+            setText('resScannedAt', ts ? 'Scanned: ' + ts : '');
+            var count = (report.analysis_response && report.analysis_response.resources) ? report.analysis_response.resources.length : 0;
+            setText('resResourceCount', count + ' resources');
+
+            // AI status badge
+            var aiEl = document.getElementById('resAiStatus');
+            if (aiEl && report.analysis_response) {
+                var ai = report.analysis_response.ai_filtering;
+                if (ai && ai.enabled) {
+                    var model = ai.ai_model || ai.provider || 'AI';
+                    aiEl.innerHTML = '<span class="badge bg-success" title="AI analysis enabled">AI: ' + esc(model) + '</span>';
+                } else {
+                    aiEl.innerHTML = '<span class="badge bg-outline-secondary text-muted" style="border:1px solid #ccc;">AI: Off</span>';
+                }
+            }
+        }
+
+        function loadReportByProfile(profileName) {
+            fetch('/analyse/cached?profileName=' + encodeURIComponent(profileName))
+                .then(function(r) {
+                    if (r.status === 204) return null;
+                    return r.json();
+                })
+                .then(function(report) {
+                    if (report && report.analysis_response) {
+                        sessionStorage.setItem('sentinel-report', JSON.stringify(report));
+                        loadResources(report.analysis_response.resources || []);
+                        showReportMeta(report);
+                    } else {
+                        showToast('No report found for ' + profileName, 'info');
+                    }
+                })
+                .catch(function() { showToast('Failed to load report'); });
+        }
+
+        function resolveAccountId(profileName) {
+            if (!profileName) return 'default';
+            var parts = profileName.split('-');
+            if (parts.length >= 2) {
+                var last = parts[parts.length - 1];
+                if (/^\d{12}$/.test(last)) return last;
+            }
+            return profileName;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var selector = document.getElementById('accountSelector');
+
+            // Only show profiles with cached reports
+            Promise.all([
+                fetch('/profiles').then(function(r) { return r.json(); }),
+                fetch('/analyse/cache/count').then(function(r) { return r.json(); }).catch(function() { return { by_account: {} }; })
+            ]).then(function(results) {
+                var profiles = results[0].profiles || [];
+                var cacheCounts = results[1].by_account || {};
+
+                selector.innerHTML = '<option value="">Select account...</option>';
+
+                var hasAny = false;
+                profiles.forEach(function(p) {
+                    var accountId = resolveAccountId(p);
+                    var count = cacheCounts[accountId] || 0;
+                    if (count > 0) {
+                        var opt = document.createElement('option');
+                        opt.value = p;
+                        opt.textContent = p + ' (' + count + ' report' + (count > 1 ? 's' : '') + ')';
+                        selector.appendChild(opt);
+                        hasAny = true;
+                    }
+                });
+
+                // Manual/Named Scans with cached reports
+                var profileAccountIds = {};
+                profiles.forEach(function(p) { profileAccountIds[resolveAccountId(p)] = true; });
+                Object.keys(cacheCounts).forEach(function(acct) {
+                    if (!profileAccountIds[acct] && acct !== 'default') {
+                        var opt = document.createElement('option');
+                        opt.value = acct;
+                        opt.textContent = acct + ' (' + cacheCounts[acct] + ' report' + (cacheCounts[acct] > 1 ? 's' : '') + ')';
+                        selector.appendChild(opt);
+                        hasAny = true;
+                    }
+                });
+
+                var hintRes = document.getElementById('noAccountsHintRes');
+                if (hintRes) hintRes.style.display = hasAny ? 'none' : '';
+            });
+
+            selector.addEventListener('change', function() {
+                if (this.value) loadReportByProfile(this.value);
+            });
+
+            var raw = sessionStorage.getItem('sentinel-report');
+            if (raw) {
+                try {
+                    var parsed = JSON.parse(raw);
+                    var profileForRefresh = parsed.profile_name || '';
+                    // Re-fetch from server to pick up latest fields
+                    fetch('/analyse/cached?profileName=' + encodeURIComponent(profileForRefresh))
+                        .then(function(r) { return r.status === 204 ? null : r.json(); })
+                        .then(function(report) {
+                            if (report && report.analysis_response) {
+                                sessionStorage.setItem('sentinel-report', JSON.stringify(report));
+                                loadResources(report.analysis_response.resources || []);
+                                showReportMeta(report);
+                                if (report.profile_name) {
+                                    setTimeout(function() { selector.value = report.profile_name; }, 500);
+                                }
+                            } else {
+                                // Fallback to session data
+                                var data = parsed.analysis_response || parsed;
+                                loadResources(data.resources || []);
+                                showReportMeta(parsed);
+                                if (parsed.profile_name) {
+                                    setTimeout(function() { selector.value = parsed.profile_name; }, 500);
+                                }
+                            }
+                        })
+                        .catch(function() {
+                            var data = parsed.analysis_response || parsed;
+                            loadResources(data.resources || []);
+                            showReportMeta(parsed);
+                        });
+                } catch (e) {}
+                return;
+            }
+
+            fetch('/analyse/jobs')
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    var completed = (data.jobs || []).filter(function(j) { return j.phase === 'complete'; });
+                    if (completed.length > 0) {
+                        return fetch('/analyse/cached?profileName=' + encodeURIComponent(completed[0].profile_name));
+                    }
+                    return null;
+                })
+                .then(function(r) {
+                    if (!r) return null;
+                    if (r.status === 204) return null;
+                    return r.json();
+                })
+                .then(function(report) {
+                    if (report && report.analysis_response) {
+                        sessionStorage.setItem('sentinel-report', JSON.stringify(report));
+                        loadResources(report.analysis_response.resources || []);
+                        showReportMeta(report);
+                        if (report.profile_name) {
+                            setTimeout(function() { selector.value = report.profile_name; }, 500);
+                        }
+                    }
+                })
+                .catch(function() {});
+        });
+    </script>
+</body>
+</html>

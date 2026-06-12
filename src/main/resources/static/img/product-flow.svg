@@ -1,0 +1,492 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 480" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e293b"/><stop offset="100%" style="stop-color:#0f172a"/>
+    </linearGradient>
+    <linearGradient id="sidebar" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a3e"/><stop offset="100%" style="stop-color:#141420"/>
+    </linearGradient>
+    <linearGradient id="cta" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#2563eb"/><stop offset="100%" style="stop-color:#7c5cfc"/>
+    </linearGradient>
+    <clipPath id="mc"><rect x="148" y="36" width="772" height="444"/></clipPath>
+    <filter id="s"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#000" flood-opacity="0.3"/></filter>
+  </defs>
+
+  <!-- dur=42s = 7 screens x 6s each -->
+
+  <!-- Background + chrome -->
+  <rect width="920" height="480" rx="12" fill="url(#bg)"/>
+  <rect width="920" height="34" rx="12" fill="#1a1a3e"/><rect y="12" width="920" height="22" fill="#1a1a3e"/>
+  <circle cx="16" cy="17" r="4.5" fill="#ef4444"/><circle cx="32" cy="17" r="4.5" fill="#f59e0b"/><circle cx="48" cy="17" r="4.5" fill="#10b981"/>
+  <text x="460" y="21" text-anchor="middle" fill="#94a3b8" font-size="9.5" font-weight="600">Cloud Resource Sentinel</text>
+
+  <!-- Sidebar -->
+  <rect y="34" width="148" height="446" fill="url(#sidebar)"/>
+  <text x="14" y="443" fill="#4a4a6a" font-size="7">Sentinel v2.0</text>
+
+  <!-- Sidebar menu: 7 items, active highlight cycles -->
+  <!-- 0=Dashboard 1=Analyse 2=Resources 3=Stats 4=Compare 5=Audit 6=Docs/About -->
+  <!-- Each screen: ~6s out of 42s total. keyTimes: 0, 0.143, 0.286, 0.429, 0.571, 0.714, 0.857, 1 -->
+
+  <!-- Helper: menu item macro. y positions: 48, 76, 104, 132, 160, 188, 216 -->
+  <!-- Dashboard -->
+  <rect x="6" y="44" width="136" height="26" rx="5" fill="rgba(124,92,252,0.2)" opacity="0">
+    <animate attributeName="opacity" dur="40s" repeatCount="indefinite" values="1;0;0;0;0;0;0;0;1" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/>
+  </rect>
+  <text x="36" y="62" font-size="9.5" font-weight="700" fill="#a78bfa" opacity="0"><animate attributeName="opacity" dur="40s" repeatCount="indefinite" values="1;0;0;0;0;0;0;0;1" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/>Dashboard</text>
+  <text x="36" y="62" font-size="9.5" fill="#6b6b8a" opacity="1"><animate attributeName="opacity" dur="40s" repeatCount="indefinite" values="0;1;1;1;1;1;1;0;0" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/>Dashboard</text>
+  <text x="14" y="62" fill="#94a3b8" font-size="11">&#x1f4ca;</text>
+
+  <!-- Analyse -->
+  <rect x="6" y="72" width="136" height="26" rx="5" fill="rgba(124,92,252,0.2)" opacity="0">
+    <animate attributeName="opacity" dur="40s" repeatCount="indefinite" values="0;1;0;0;0;0;0;0;0" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/>
+  </rect>
+  <text x="36" y="90" font-size="9.5" font-weight="700" fill="#a78bfa" opacity="0"><animate attributeName="opacity" dur="40s" repeatCount="indefinite" values="0;1;0;0;0;0;0;0;0" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/>Analyse</text>
+  <text x="36" y="90" font-size="9.5" fill="#6b6b8a" opacity="1"><animate attributeName="opacity" dur="40s" repeatCount="indefinite" values="1;0;1;1;1;1;1;1;1" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/>Analyse</text>
+  <text x="14" y="90" fill="#94a3b8" font-size="11">&#x1f50d;</text>
+
+  <!-- Resources -->
+  <rect x="6" y="100" width="136" height="26" rx="5" fill="rgba(124,92,252,0.2)" opacity="0">
+    <animate attributeName="opacity" dur="40s" repeatCount="indefinite" values="0;0;1;0;0;0;0;0;0" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/>
+  </rect>
+  <text x="36" y="118" font-size="9.5" font-weight="700" fill="#a78bfa" opacity="0"><animate attributeName="opacity" dur="40s" repeatCount="indefinite" values="0;0;1;0;0;0;0;0;0" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/>Resources</text>
+  <text x="36" y="118" font-size="9.5" fill="#6b6b8a" opacity="1"><animate attributeName="opacity" dur="40s" repeatCount="indefinite" values="1;1;0;1;1;1;1;1;1" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/>Resources</text>
+  <text x="14" y="118" fill="#94a3b8" font-size="11">&#x1f4cb;</text>
+
+  <!-- Stats -->
+  <rect x="6" y="128" width="136" height="26" rx="5" fill="rgba(124,92,252,0.2)" opacity="0">
+    <animate attributeName="opacity" dur="40s" repeatCount="indefinite" values="0;0;0;1;0;0;0;0;0" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/>
+  </rect>
+  <text x="36" y="146" font-size="9.5" font-weight="700" fill="#a78bfa" opacity="0"><animate attributeName="opacity" dur="40s" repeatCount="indefinite" values="0;0;0;1;0;0;0;0;0" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/>Stats</text>
+  <text x="36" y="146" font-size="9.5" fill="#6b6b8a" opacity="1"><animate attributeName="opacity" dur="40s" repeatCount="indefinite" values="1;1;1;0;1;1;1;1;1" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/>Stats</text>
+  <text x="14" y="146" fill="#94a3b8" font-size="11">&#x1f4ca;</text>
+
+  <!-- Compare -->
+  <rect x="6" y="156" width="136" height="26" rx="5" fill="rgba(124,92,252,0.2)" opacity="0">
+    <animate attributeName="opacity" dur="40s" repeatCount="indefinite" values="0;0;0;0;1;0;0;0;0" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/>
+  </rect>
+  <text x="36" y="174" font-size="9.5" font-weight="700" fill="#a78bfa" opacity="0"><animate attributeName="opacity" dur="40s" repeatCount="indefinite" values="0;0;0;0;1;0;0;0;0" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/>Compare</text>
+  <text x="36" y="174" font-size="9.5" fill="#6b6b8a" opacity="1"><animate attributeName="opacity" dur="40s" repeatCount="indefinite" values="1;1;1;1;0;1;1;1;1" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/>Compare</text>
+  <text x="14" y="174" fill="#94a3b8" font-size="11">&#x1f504;</text>
+
+  <!-- Audit Trail -->
+  <rect x="6" y="184" width="136" height="26" rx="5" fill="rgba(124,92,252,0.2)" opacity="0">
+    <animate attributeName="opacity" dur="40s" repeatCount="indefinite" values="0;0;0;0;0;1;0;0;0" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/>
+  </rect>
+  <text x="36" y="202" font-size="9.5" font-weight="700" fill="#a78bfa" opacity="0"><animate attributeName="opacity" dur="40s" repeatCount="indefinite" values="0;0;0;0;0;1;0;0;0" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/>Audit Trail</text>
+  <text x="36" y="202" font-size="9.5" fill="#6b6b8a" opacity="1"><animate attributeName="opacity" dur="40s" repeatCount="indefinite" values="1;1;1;1;1;0;1;1;1" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/>Audit Trail</text>
+  <text x="14" y="202" fill="#94a3b8" font-size="11">&#x1f4dc;</text>
+
+  <!-- Documentation / About -->
+  <rect x="6" y="212" width="136" height="26" rx="5" fill="rgba(124,92,252,0.2)" opacity="0">
+    <animate attributeName="opacity" dur="40s" repeatCount="indefinite" values="0;0;0;0;0;0;1;0;0" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/>
+  </rect>
+  <!-- Documentation (screen 7) -->
+  <rect x="6" y="212" width="136" height="26" rx="5" fill="rgba(124,92,252,0.2)" opacity="0">
+    <animate attributeName="opacity" dur="40s" repeatCount="indefinite" values="0;0;0;0;0;0;1;0;0" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/>
+  </rect>
+  <text x="36" y="230" font-size="9.5" font-weight="700" fill="#a78bfa" opacity="0"><animate attributeName="opacity" dur="40s" repeatCount="indefinite" values="0;0;0;0;0;0;1;0;0" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/>Documentation</text>
+  <text x="36" y="230" font-size="9.5" fill="#6b6b8a" opacity="1"><animate attributeName="opacity" dur="40s" repeatCount="indefinite" values="1;1;1;1;1;1;0;1;1" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/>Documentation</text>
+  <text x="14" y="230" fill="#94a3b8" font-size="11">&#x1f4da;</text>
+
+  <!-- About (screen 8) -->
+  <rect x="6" y="240" width="136" height="26" rx="5" fill="rgba(124,92,252,0.2)" opacity="0">
+    <animate attributeName="opacity" dur="40s" repeatCount="indefinite" values="0;0;0;0;0;0;0;1;0" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/>
+  </rect>
+  <text x="36" y="258" font-size="9.5" font-weight="700" fill="#a78bfa" opacity="0"><animate attributeName="opacity" dur="40s" repeatCount="indefinite" values="0;0;0;0;0;0;0;1;0" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/>About</text>
+  <text x="36" y="258" font-size="9.5" fill="#6b6b8a" opacity="1"><animate attributeName="opacity" dur="40s" repeatCount="indefinite" values="1;1;1;1;1;1;1;0;1" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/>About</text>
+  <text x="14" y="258" fill="#94a3b8" font-size="11">&#x2139;&#xfe0f;</text>
+
+  <!-- ===== SCREEN 1: DASHBOARD ===== -->
+  <g clip-path="url(#mc)" opacity="0">
+    <animate attributeName="opacity" dur="40s" repeatCount="indefinite" values="1;0;0;0;0;0;0;0;1" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/>
+    <rect x="148" y="34" width="772" height="446" fill="#141420"/>
+    <text x="168" y="58" fill="#e4e4f0" font-size="13" font-weight="700">Dashboard</text>
+    <rect x="800" y="44" width="52" height="20" rx="4" fill="rgba(37,99,235,0.2)"/><text x="810" y="58" fill="#3b82f6" font-size="8" font-weight="600">Re-scan</text>
+    <rect x="860" y="44" width="40" height="20" rx="4" fill="rgba(6,182,212,0.2)"/><text x="868" y="58" fill="#22d3ee" font-size="8" font-weight="600">Stats</text>
+    <!-- Cards -->
+    <g filter="url(#s)"><rect x="168" y="72" width="175" height="52" rx="7" fill="#1c1c2e"/><text x="180" y="88" fill="#6b6b8a" font-size="7.5" font-weight="600">TOTAL RESOURCES</text><text x="180" y="112" fill="#e4e4f0" font-size="22" font-weight="700">1,035</text></g>
+    <g filter="url(#s)"><rect x="353" y="72" width="175" height="52" rx="7" fill="#1c1c2e"/><text x="365" y="88" fill="#6b6b8a" font-size="7.5" font-weight="600">MONTHLY COST</text><text x="365" y="112" fill="#f87171" font-size="22" font-weight="700">$585.40</text></g>
+    <g filter="url(#s)"><rect x="538" y="72" width="175" height="52" rx="7" fill="#1c1c2e"/><text x="550" y="88" fill="#6b6b8a" font-size="7.5" font-weight="600">IDLE RESOURCES</text><text x="550" y="112" fill="#fbbf24" font-size="22" font-weight="700">135</text></g>
+    <g filter="url(#s)"><rect x="723" y="72" width="175" height="52" rx="7" fill="#1c1c2e"/><text x="735" y="88" fill="#6b6b8a" font-size="7.5" font-weight="600">POTENTIAL SAVINGS</text><text x="735" y="112" fill="#34d399" font-size="22" font-weight="700">$37.23</text></g>
+    <!-- Resource tiles -->
+    <text x="168" y="147" fill="#e4e4f0" font-size="10" font-weight="700">Resource Breakdown</text>
+    <g filter="url(#s)"><rect x="168" y="155" width="72" height="42" rx="5" fill="#1c1c2e"/><rect x="168" y="155" width="3" height="42" rx="1" fill="#2563eb"/><text x="178" y="170" fill="#6b6b8a" font-size="6.5" font-weight="600">SSM PARAM</text><text x="178" y="188" fill="#e4e4f0" font-size="15" font-weight="700">507</text></g>
+    <g filter="url(#s)"><rect x="248" y="155" width="72" height="42" rx="5" fill="#1c1c2e"/><rect x="248" y="155" width="3" height="42" rx="1" fill="#0891b2"/><text x="258" y="170" fill="#6b6b8a" font-size="6.5" font-weight="600">CW ALARM</text><text x="258" y="188" fill="#e4e4f0" font-size="15" font-weight="700">226</text></g>
+    <g filter="url(#s)"><rect x="328" y="155" width="72" height="42" rx="5" fill="#1c1c2e"/><rect x="328" y="155" width="3" height="42" rx="1" fill="#be185d"/><text x="338" y="170" fill="#6b6b8a" font-size="6.5" font-weight="600">IAM ROLE</text><text x="338" y="188" fill="#e4e4f0" font-size="15" font-weight="700">103</text></g>
+    <g filter="url(#s)"><rect x="408" y="155" width="72" height="42" rx="5" fill="#1c1c2e"/><rect x="408" y="155" width="3" height="42" rx="1" fill="#047857"/><text x="418" y="170" fill="#6b6b8a" font-size="6.5" font-weight="600">LOG GROUP</text><text x="418" y="188" fill="#e4e4f0" font-size="15" font-weight="700">75</text></g>
+    <g filter="url(#s)"><rect x="488" y="155" width="72" height="42" rx="5" fill="#1c1c2e"/><rect x="488" y="155" width="3" height="42" rx="1" fill="#8b5cf6"/><text x="498" y="170" fill="#6b6b8a" font-size="6.5" font-weight="600">DYNAMODB</text><text x="498" y="188" fill="#e4e4f0" font-size="15" font-weight="700">33</text></g>
+    <g filter="url(#s)"><rect x="568" y="155" width="72" height="42" rx="5" fill="#1c1c2e"/><rect x="568" y="155" width="3" height="42" rx="1" fill="#ea580c"/><text x="578" y="170" fill="#6b6b8a" font-size="6.5" font-weight="600">LAMBDA</text><text x="578" y="188" fill="#e4e4f0" font-size="15" font-weight="700">15</text></g>
+    <g filter="url(#s)"><rect x="648" y="155" width="72" height="42" rx="5" fill="#1c1c2e"/><rect x="648" y="155" width="3" height="42" rx="1" fill="#ef4444"/><text x="658" y="170" fill="#6b6b8a" font-size="6.5" font-weight="600">ELASTIC IP</text><text x="658" y="188" fill="#e4e4f0" font-size="15" font-weight="700">12</text></g>
+    <g filter="url(#s)"><rect x="728" y="155" width="72" height="42" rx="5" fill="#1c1c2e"/><rect x="728" y="155" width="3" height="42" rx="1" fill="#dc2626"/><text x="738" y="170" fill="#6b6b8a" font-size="6.5" font-weight="600">SNS</text><text x="738" y="188" fill="#e4e4f0" font-size="15" font-weight="700">9</text></g>
+    <!-- Charts -->
+    <g filter="url(#s)"><rect x="168" y="208" width="370" height="250" rx="7" fill="#1c1c2e"/>
+      <text x="180" y="228" fill="#e4e4f0" font-size="9.5" font-weight="700">Recommendation Breakdown</text>
+      <circle cx="290" y="0" r="60" fill="none" stroke="#2a2a42" stroke-width="18" cy="350"/>
+      <circle cx="290" r="60" fill="none" stroke="#ef4444" stroke-width="18" stroke-dasharray="113 264" transform="rotate(-90 290 350)" cy="350"/>
+      <circle cx="290" r="60" fill="none" stroke="#f59e0b" stroke-width="18" stroke-dasharray="60 317" stroke-dashoffset="-113" transform="rotate(-90 290 350)" cy="350"/>
+      <circle cx="290" r="60" fill="none" stroke="#3b82f6" stroke-width="18" stroke-dasharray="38 339" stroke-dashoffset="-173" transform="rotate(-90 290 350)" cy="350"/>
+      <circle cx="290" r="60" fill="none" stroke="#10b981" stroke-width="18" stroke-dasharray="166 211" stroke-dashoffset="-211" transform="rotate(-90 290 350)" cy="350"/>
+      <circle cx="400" cy="300" r="4" fill="#ef4444"/><text x="410" y="304" fill="#b4b4cc" font-size="8">Idle / Remove (30%)</text>
+      <circle cx="400" cy="320" r="4" fill="#f59e0b"/><text x="410" y="324" fill="#b4b4cc" font-size="8">Low Utilisation (16%)</text>
+      <circle cx="400" cy="340" r="4" fill="#3b82f6"/><text x="410" y="344" fill="#b4b4cc" font-size="8">Review (10%)</text>
+      <circle cx="400" cy="360" r="4" fill="#10b981"/><text x="410" y="364" fill="#b4b4cc" font-size="8">Active (44%)</text>
+    </g>
+    <g filter="url(#s)"><rect x="548" y="208" width="350" height="250" rx="7" fill="#1c1c2e"/>
+      <text x="560" y="228" fill="#e4e4f0" font-size="9.5" font-weight="700">Cost by Resource Type</text>
+      <text x="560" y="258" fill="#6b6b8a" font-size="8">EC2</text><rect x="610" y="248" width="240" height="11" rx="3" fill="#2563eb"/>
+      <text x="560" y="280" fill="#6b6b8a" font-size="8">RDS</text><rect x="610" y="270" width="170" height="11" rx="3" fill="#10b981"/>
+      <text x="560" y="302" fill="#6b6b8a" font-size="8">NAT GW</text><rect x="610" y="292" width="100" height="11" rx="3" fill="#06b6d4"/>
+      <text x="560" y="324" fill="#6b6b8a" font-size="8">EBS</text><rect x="610" y="314" width="70" height="11" rx="3" fill="#f59e0b"/>
+      <text x="560" y="346" fill="#6b6b8a" font-size="8">ELB</text><rect x="610" y="336" width="50" height="11" rx="3" fill="#7c3aed"/>
+      <text x="560" y="368" fill="#6b6b8a" font-size="8">ElastiCache</text><rect x="610" y="358" width="35" height="11" rx="3" fill="#ec4899"/>
+      <text x="560" y="390" fill="#6b6b8a" font-size="8">Lambda</text><rect x="610" y="380" width="15" height="11" rx="3" fill="#ea580c"/>
+    </g>
+  </g>
+
+  <!-- ===== SCREEN 2: ANALYSE ===== -->
+  <g clip-path="url(#mc)" opacity="0">
+    <animate attributeName="opacity" dur="40s" repeatCount="indefinite" values="0;1;0;0;0;0;0;0;0" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/>
+    <rect x="148" y="34" width="772" height="446" fill="#141420"/>
+    <text x="168" y="58" fill="#e4e4f0" font-size="13" font-weight="700">Analyse Resources</text>
+    <!-- Credentials -->
+    <g filter="url(#s)"><rect x="168" y="72" width="730" height="60" rx="7" fill="#1c1c2e"/>
+      <text x="180" y="90" fill="#e4e4f0" font-size="9.5" font-weight="700">AWS Credentials</text>
+      <rect x="180" y="100" width="90" height="20" rx="4" fill="#2563eb"/><text x="195" y="114" fill="white" font-size="8" font-weight="600">AWS Profile</text>
+      <rect x="278" y="100" width="90" height="20" rx="4" fill="rgba(37,99,235,0.15)"/><text x="290" y="114" fill="#3b82f6" font-size="8">Credentials</text>
+      <rect x="390" y="100" width="300" height="20" rx="4" fill="#2a2a42"/><text x="400" y="114" fill="#94a3b8" font-size="8.5">PowerUser-123456789012</text>
+    </g>
+    <!-- Regions -->
+    <g filter="url(#s)"><rect x="168" y="142" width="730" height="72" rx="7" fill="#1c1c2e"/>
+      <text x="180" y="160" fill="#e4e4f0" font-size="9.5" font-weight="700">Regions</text>
+      <rect x="180" y="170" width="55" height="16" rx="3" fill="rgba(37,99,235,0.2)"/><text x="188" y="182" fill="#3b82f6" font-size="7.5" font-weight="600">Select All</text>
+      <rect x="248" y="170" width="8" height="8" rx="2" fill="#2563eb"/><text x="260" y="178" fill="#b4b4cc" font-size="7.5">us-east-1</text>
+      <rect x="330" y="170" width="8" height="8" rx="2" fill="#2563eb"/><text x="342" y="178" fill="#b4b4cc" font-size="7.5">us-east-2</text>
+      <rect x="412" y="170" width="8" height="8" rx="2" fill="#2563eb"/><text x="424" y="178" fill="#b4b4cc" font-size="7.5">us-west-1</text>
+      <rect x="494" y="170" width="8" height="8" rx="2" fill="#2563eb"/><text x="506" y="178" fill="#b4b4cc" font-size="7.5">us-west-2</text>
+      <rect x="576" y="170" width="8" height="8" rx="2" fill="#2563eb"/><text x="588" y="178" fill="#b4b4cc" font-size="7.5">eu-west-1</text>
+      <rect x="658" y="170" width="8" height="8" rx="2" fill="#2563eb"/><text x="670" y="178" fill="#b4b4cc" font-size="7.5">eu-central-1</text>
+      <rect x="248" y="190" width="8" height="8" rx="2" fill="#2563eb"/><text x="260" y="198" fill="#b4b4cc" font-size="7.5">ap-south-1</text>
+      <rect x="330" y="190" width="8" height="8" rx="2" fill="#2563eb"/><text x="342" y="198" fill="#b4b4cc" font-size="7.5">ap-southeast-1</text>
+      <rect x="440" y="190" width="8" height="8" rx="2" fill="#2563eb"/><text x="452" y="198" fill="#b4b4cc" font-size="7.5">ap-northeast-1</text>
+      <rect x="550" y="190" width="8" height="8" rx="2" fill="#2563eb"/><text x="562" y="198" fill="#b4b4cc" font-size="7.5">sa-east-1</text>
+      <text x="760" y="178" fill="#6b6b8a" font-size="7">+20 more</text>
+    </g>
+    <!-- Category -->
+    <g filter="url(#s)"><rect x="168" y="224" width="730" height="48" rx="7" fill="#1c1c2e"/>
+      <text x="180" y="242" fill="#e4e4f0" font-size="9.5" font-weight="700">Scan Category</text>
+      <rect x="180" y="252" width="230" height="16" rx="3" fill="#10b981"/><text x="260" y="264" fill="white" font-size="8" font-weight="600" text-anchor="middle">Cost &amp; Idle Resources</text>
+      <rect x="415" y="252" width="230" height="16" rx="3" fill="rgba(245,158,11,0.15)" stroke="#f59e0b" stroke-width="0.5"/><text x="530" y="264" fill="#f59e0b" font-size="8" font-weight="600" text-anchor="middle">Security &amp; Governance</text>
+      <rect x="650" y="252" width="120" height="16" rx="3" fill="rgba(37,99,235,0.15)" stroke="#3b82f6" stroke-width="0.5"/><text x="710" y="264" fill="#3b82f6" font-size="8" font-weight="600" text-anchor="middle">Full Scan</text>
+    </g>
+    <!-- AI -->
+    <g filter="url(#s)"><rect x="168" y="282" width="730" height="42" rx="7" fill="#1c1c2e"/>
+      <text x="180" y="300" fill="#e4e4f0" font-size="9.5" font-weight="700">AI Filtering</text>
+      <rect x="180" y="306" width="24" height="12" rx="6" fill="#2563eb"/><circle cx="198" cy="312" r="5" fill="white"/>
+      <text x="212" y="316" fill="#b4b4cc" font-size="8">Enable AI-powered idle resource detection</text>
+    </g>
+    <!-- Buttons -->
+    <rect x="168" y="338" width="600" height="32" rx="6" fill="url(#cta)"/><text x="468" y="359" text-anchor="middle" fill="white" font-size="11" font-weight="700">Analyse Resources</text>
+    <rect x="778" y="338" width="120" height="32" rx="6" fill="rgba(37,99,235,0.15)" stroke="#3b82f6" stroke-width="0.5"/><text x="838" y="359" text-anchor="middle" fill="#3b82f6" font-size="9.5" font-weight="600">Scan All Profiles</text>
+    <!-- Progress -->
+    <rect x="168" y="385" width="730" height="3" rx="1.5" fill="#2a2a42"/>
+    <rect x="168" y="385" width="0" height="3" rx="1.5" fill="#2563eb"><animate attributeName="width" values="0;730" dur="5s" repeatCount="indefinite"/></rect>
+    <text x="533" y="405" text-anchor="middle" fill="#3b82f6" font-size="8.5" font-weight="600">Scanning 23 resource types across 30 regions...</text>
+  </g>
+
+  <!-- ===== SCREEN 3: RESOURCES ===== -->
+  <g clip-path="url(#mc)" opacity="0">
+    <animate attributeName="opacity" dur="40s" repeatCount="indefinite" values="0;0;1;0;0;0;0;0;0" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/>
+    <rect x="148" y="34" width="772" height="446" fill="#141420"/>
+    <text x="168" y="58" fill="#e4e4f0" font-size="13" font-weight="700">Resource Details</text>
+    <rect x="800" y="44" width="22" height="20" rx="4" fill="rgba(239,68,68,0.15)"/><text x="803" y="58" fill="#f87171" font-size="7">&#x2716;</text>
+    <rect x="830" y="44" width="65" height="20" rx="4" fill="rgba(16,185,129,0.2)"/><text x="840" y="58" fill="#10b981" font-size="8" font-weight="600">Export CSV</text>
+    <!-- Filters -->
+    <g filter="url(#s)"><rect x="168" y="72" width="730" height="30" rx="6" fill="#1c1c2e"/>
+      <rect x="178" y="78" width="190" height="18" rx="3" fill="#2a2a42"/><text x="188" y="91" fill="#6b6b8a" font-size="7.5">Search by name or ID...</text>
+      <rect x="378" y="78" width="110" height="18" rx="3" fill="#2a2a42"/><text x="388" y="91" fill="#94a3b8" font-size="7.5">All Types</text>
+      <rect x="498" y="78" width="140" height="18" rx="3" fill="#2a2a42"/><text x="508" y="91" fill="#94a3b8" font-size="7.5">All Recommendations</text>
+    </g>
+    <!-- Table -->
+    <g filter="url(#s)"><rect x="168" y="110" width="730" height="350" rx="7" fill="#1c1c2e"/>
+      <rect x="168" y="110" width="730" height="20" rx="7" fill="#22223a"/><rect x="168" y="122" width="730" height="8" fill="#22223a"/>
+      <text x="180" y="125" fill="#6b6b8a" font-size="6.5" font-weight="600">REGION</text>
+      <text x="248" y="125" fill="#6b6b8a" font-size="6.5" font-weight="600">TYPE</text>
+      <text x="310" y="125" fill="#6b6b8a" font-size="6.5" font-weight="600">NAME</text>
+      <text x="480" y="125" fill="#6b6b8a" font-size="6.5" font-weight="600">STATE</text>
+      <text x="545" y="125" fill="#6b6b8a" font-size="6.5" font-weight="600">COST</text>
+      <text x="610" y="125" fill="#6b6b8a" font-size="6.5" font-weight="600">CPU %</text>
+      <text x="670" y="125" fill="#6b6b8a" font-size="6.5" font-weight="600">RECOMMENDATION</text>
+      <!-- 8 rows -->
+      <line x1="168" y1="138" x2="898" y2="138" stroke="#2a2a42"/>
+      <text x="180" y="153" fill="#b4b4cc" font-size="7.5">us-east-1</text><rect x="248" y="143" width="28" height="13" rx="3" fill="rgba(107,107,138,0.15)"/><text x="254" y="153" fill="#b4b4cc" font-size="7">EC2</text><text x="310" y="153" fill="#b4b4cc" font-size="7.5">web-staging-01</text><text x="480" y="153" fill="#6b6b8a" font-size="7.5">stopped</text><text x="545" y="153" fill="#e4e4f0" font-size="7.5">$60.74</text><text x="610" y="153" fill="#6b6b8a" font-size="7.5">0.0%</text><rect x="670" y="143" width="120" height="13" rx="3" fill="rgba(248,113,113,0.15)"/><text x="678" y="153" fill="#f87171" font-size="6.5" font-weight="600">Consider Terminating</text>
+      <line x1="168" y1="162" x2="898" y2="162" stroke="#2a2a42"/>
+      <text x="180" y="177" fill="#b4b4cc" font-size="7.5">us-west-2</text><rect x="248" y="167" width="28" height="13" rx="3" fill="rgba(107,107,138,0.15)"/><text x="254" y="177" fill="#b4b4cc" font-size="7">EC2</text><text x="310" y="177" fill="#b4b4cc" font-size="7.5">cloudbees-host-09</text><text x="480" y="177" fill="#6b6b8a" font-size="7.5">running</text><text x="545" y="177" fill="#e4e4f0" font-size="7.5">$3,363</text><text x="610" y="177" fill="#6b6b8a" font-size="7.5">0.0%</text><rect x="670" y="167" width="85" height="13" rx="3" fill="rgba(248,113,113,0.15)"/><text x="678" y="177" fill="#f87171" font-size="6.5" font-weight="600">Idle - Downsize</text>
+      <line x1="168" y1="186" x2="898" y2="186" stroke="#2a2a42"/>
+      <text x="180" y="201" fill="#b4b4cc" font-size="7.5">us-west-2</text><rect x="248" y="191" width="28" height="13" rx="3" fill="rgba(107,107,138,0.15)"/><text x="254" y="201" fill="#b4b4cc" font-size="7">RDS</text><text x="310" y="201" fill="#b4b4cc" font-size="7.5">analytics-db</text><text x="480" y="201" fill="#6b6b8a" font-size="7.5">available</text><text x="545" y="201" fill="#e4e4f0" font-size="7.5">$249.66</text><text x="610" y="201" fill="#6b6b8a" font-size="7.5">4.1%</text><rect x="670" y="191" width="75" height="13" rx="3" fill="rgba(251,191,36,0.15)"/><text x="678" y="201" fill="#fbbf24" font-size="6.5" font-weight="600">Low Utilization</text>
+      <line x1="168" y1="210" x2="898" y2="210" stroke="#2a2a42"/>
+      <text x="180" y="225" fill="#b4b4cc" font-size="7.5">eu-west-1</text><rect x="248" y="215" width="28" height="13" rx="3" fill="rgba(107,107,138,0.15)"/><text x="254" y="225" fill="#b4b4cc" font-size="7">EBS</text><text x="310" y="225" fill="#b4b4cc" font-size="7.5">vol-0a8f3c92</text><text x="480" y="225" fill="#6b6b8a" font-size="7.5">available</text><text x="545" y="225" fill="#e4e4f0" font-size="7.5">$10.00</text><text x="610" y="225" fill="#6b6b8a" font-size="7.5">-</text><rect x="670" y="215" width="90" height="13" rx="3" fill="rgba(248,113,113,0.15)"/><text x="678" y="225" fill="#f87171" font-size="6.5" font-weight="600">Delete - Unattached</text>
+      <line x1="168" y1="234" x2="898" y2="234" stroke="#2a2a42"/>
+      <text x="180" y="249" fill="#b4b4cc" font-size="7.5">us-east-1</text><rect x="248" y="239" width="42" height="13" rx="3" fill="rgba(107,107,138,0.15)"/><text x="252" y="249" fill="#b4b4cc" font-size="7">Lambda</text><text x="310" y="249" fill="#b4b4cc" font-size="7.5">legacy-processor</text><text x="480" y="249" fill="#6b6b8a" font-size="7.5">idle</text><text x="545" y="249" fill="#e4e4f0" font-size="7.5">$0.00</text><text x="610" y="249" fill="#6b6b8a" font-size="7.5">0 inv</text><rect x="670" y="239" width="95" height="13" rx="3" fill="rgba(248,113,113,0.15)"/><text x="678" y="249" fill="#f87171" font-size="6.5" font-weight="600">Idle - No Invocations</text>
+      <line x1="168" y1="258" x2="898" y2="258" stroke="#2a2a42"/>
+      <text x="180" y="273" fill="#b4b4cc" font-size="7.5">ap-south-1</text><rect x="248" y="263" width="28" height="13" rx="3" fill="rgba(107,107,138,0.15)"/><text x="254" y="273" fill="#b4b4cc" font-size="7">EC2</text><text x="310" y="273" fill="#b4b4cc" font-size="7.5">api-prod-01</text><text x="480" y="273" fill="#6b6b8a" font-size="7.5">running</text><text x="545" y="273" fill="#e4e4f0" font-size="7.5">$140.16</text><text x="610" y="273" fill="#6b6b8a" font-size="7.5">67.2%</text><rect x="670" y="263" width="42" height="13" rx="3" fill="rgba(52,211,153,0.15)"/><text x="678" y="273" fill="#34d399" font-size="6.5" font-weight="600">Active</text>
+      <line x1="168" y1="282" x2="898" y2="282" stroke="#2a2a42"/>
+      <text x="180" y="297" fill="#b4b4cc" font-size="7.5">eu-west-1</text><rect x="248" y="287" width="48" height="13" rx="3" fill="rgba(107,107,138,0.15)"/><text x="252" y="297" fill="#b4b4cc" font-size="7">NAT GW</text><text x="310" y="297" fill="#b4b4cc" font-size="7.5">nat-0f2e8b</text><text x="480" y="297" fill="#6b6b8a" font-size="7.5">available</text><text x="545" y="297" fill="#e4e4f0" font-size="7.5">$32.85</text><text x="610" y="297" fill="#6b6b8a" font-size="7.5">0 B</text><rect x="670" y="287" width="80" height="13" rx="3" fill="rgba(248,113,113,0.15)"/><text x="678" y="297" fill="#f87171" font-size="6.5" font-weight="600">Idle - Low Traffic</text>
+      <line x1="168" y1="306" x2="898" y2="306" stroke="#2a2a42"/>
+      <text x="180" y="321" fill="#b4b4cc" font-size="7.5">global</text><rect x="248" y="311" width="50" height="13" rx="3" fill="rgba(107,107,138,0.15)"/><text x="252" y="321" fill="#b4b4cc" font-size="7">IAM User</text><text x="310" y="321" fill="#b4b4cc" font-size="7.5">deploy-bot</text><text x="480" y="321" fill="#6b6b8a" font-size="7.5">review</text><text x="545" y="321" fill="#e4e4f0" font-size="7.5">$0.00</text><text x="610" y="321" fill="#6b6b8a" font-size="7.5">-</text><rect x="670" y="311" width="95" height="13" rx="3" fill="rgba(59,130,246,0.15)"/><text x="678" y="321" fill="#3b82f6" font-size="6.5" font-weight="600">Review - MFA Disabled</text>
+    </g>
+  </g>
+
+  <!-- ===== SCREEN 4: STATS ===== -->
+  <g clip-path="url(#mc)" opacity="0">
+    <animate attributeName="opacity" dur="40s" repeatCount="indefinite" values="0;0;0;1;0;0;0;0;0" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/>
+    <rect x="148" y="34" width="772" height="446" fill="#141420"/>
+    <text x="168" y="58" fill="#e4e4f0" font-size="13" font-weight="700">Resource Statistics</text>
+    <!-- 6 mini cards -->
+    <g filter="url(#s)"><rect x="168" y="72" width="115" height="40" rx="5" fill="#1c1c2e"/><text x="178" y="86" fill="#6b6b8a" font-size="6.5" font-weight="600">TOTAL</text><text x="178" y="104" fill="#e4e4f0" font-size="16" font-weight="700">1,035</text></g>
+    <g filter="url(#s)"><rect x="291" y="72" width="115" height="40" rx="5" fill="#1c1c2e"/><text x="301" y="86" fill="#6b6b8a" font-size="6.5" font-weight="600">COST</text><text x="301" y="104" fill="#f87171" font-size="16" font-weight="700">$585</text></g>
+    <g filter="url(#s)"><rect x="414" y="72" width="115" height="40" rx="5" fill="#1c1c2e"/><text x="424" y="86" fill="#6b6b8a" font-size="6.5" font-weight="600">IDLE</text><text x="424" y="104" fill="#fbbf24" font-size="16" font-weight="700">135</text></g>
+    <g filter="url(#s)"><rect x="537" y="72" width="115" height="40" rx="5" fill="#1c1c2e"/><text x="547" y="86" fill="#6b6b8a" font-size="6.5" font-weight="600">SAVINGS</text><text x="547" y="104" fill="#34d399" font-size="16" font-weight="700">$37</text></g>
+    <g filter="url(#s)"><rect x="660" y="72" width="115" height="40" rx="5" fill="#1c1c2e"/><text x="670" y="86" fill="#6b6b8a" font-size="6.5" font-weight="600">REGIONS</text><text x="670" y="104" fill="#22d3ee" font-size="16" font-weight="700">10</text></g>
+    <g filter="url(#s)"><rect x="783" y="72" width="115" height="40" rx="5" fill="#1c1c2e"/><text x="793" y="86" fill="#6b6b8a" font-size="6.5" font-weight="600">TYPES</text><text x="793" y="104" fill="#a78bfa" font-size="16" font-weight="700">18</text></g>
+    <!-- 4 charts -->
+    <g filter="url(#s)"><rect x="168" y="122" width="370" height="165" rx="7" fill="#1c1c2e"/>
+      <text x="180" y="140" fill="#e4e4f0" font-size="9" font-weight="700">Cost by Resource Type</text>
+      <text x="180" y="162" fill="#6b6b8a" font-size="7.5">EC2</text><rect x="220" y="152" width="270" height="10" rx="3" fill="#2563eb"/><text x="496" y="162" fill="#6b6b8a" font-size="7">$340</text>
+      <text x="180" y="180" fill="#6b6b8a" font-size="7.5">RDS</text><rect x="220" y="170" width="180" height="10" rx="3" fill="#10b981"/><text x="406" y="180" fill="#6b6b8a" font-size="7">$210</text>
+      <text x="180" y="198" fill="#6b6b8a" font-size="7.5">NAT GW</text><rect x="220" y="188" width="100" height="10" rx="3" fill="#06b6d4"/><text x="326" y="198" fill="#6b6b8a" font-size="7">$98</text>
+      <text x="180" y="216" fill="#6b6b8a" font-size="7.5">EBS</text><rect x="220" y="206" width="60" height="10" rx="3" fill="#f59e0b"/><text x="286" y="216" fill="#6b6b8a" font-size="7">$45</text>
+      <text x="180" y="234" fill="#6b6b8a" font-size="7.5">ELB</text><rect x="220" y="224" width="40" height="10" rx="3" fill="#7c3aed"/><text x="266" y="234" fill="#6b6b8a" font-size="7">$32</text>
+      <text x="168" y="278" fill="#6b6b8a" font-size="6.5" font-style="italic">Biggest cost drivers — focus optimisation here</text>
+    </g>
+    <g filter="url(#s)"><rect x="548" y="122" width="350" height="165" rx="7" fill="#1c1c2e"/>
+      <text x="560" y="140" fill="#e4e4f0" font-size="9" font-weight="700">CPU Utilisation Distribution</text>
+      <text x="560" y="162" fill="#6b6b8a" font-size="7.5">0%</text><rect x="600" y="152" width="210" height="10" rx="3" fill="#ef4444"/><text x="816" y="162" fill="#6b6b8a" font-size="7">412</text>
+      <text x="560" y="180" fill="#6b6b8a" font-size="7.5">1-5%</text><rect x="600" y="170" width="120" height="10" rx="3" fill="#f97316"/><text x="726" y="180" fill="#6b6b8a" font-size="7">198</text>
+      <text x="560" y="198" fill="#6b6b8a" font-size="7.5">5-20%</text><rect x="600" y="188" width="70" height="10" rx="3" fill="#f59e0b"/><text x="676" y="198" fill="#6b6b8a" font-size="7">87</text>
+      <text x="560" y="216" fill="#6b6b8a" font-size="7.5">20-50%</text><rect x="600" y="206" width="45" height="10" rx="3" fill="#3b82f6"/><text x="651" y="216" fill="#6b6b8a" font-size="7">56</text>
+      <text x="560" y="234" fill="#6b6b8a" font-size="7.5">50%+</text><rect x="600" y="224" width="90" height="10" rx="3" fill="#10b981"/><text x="696" y="234" fill="#6b6b8a" font-size="7">282</text>
+      <text x="548" y="278" fill="#6b6b8a" font-size="6.5" font-style="italic">Below 5% = idle, below 20% = downsize candidate</text>
+    </g>
+    <g filter="url(#s)"><rect x="168" y="297" width="370" height="160" rx="7" fill="#1c1c2e"/>
+      <text x="180" y="315" fill="#e4e4f0" font-size="9" font-weight="700">Resources by Region</text>
+      <text x="180" y="338" fill="#6b6b8a" font-size="7.5">us-east-1</text><rect x="240" y="328" width="250" height="10" rx="3" fill="#2563eb"/>
+      <text x="180" y="356" fill="#6b6b8a" font-size="7.5">us-west-2</text><rect x="240" y="346" width="180" height="10" rx="3" fill="#2563eb"/>
+      <text x="180" y="374" fill="#6b6b8a" font-size="7.5">eu-west-1</text><rect x="240" y="364" width="110" height="10" rx="3" fill="#2563eb"/>
+      <text x="180" y="392" fill="#6b6b8a" font-size="7.5">ap-south-1</text><rect x="240" y="382" width="60" height="10" rx="3" fill="#2563eb"/>
+      <text x="180" y="410" fill="#6b6b8a" font-size="7.5">sa-east-1</text><rect x="240" y="400" width="30" height="10" rx="3" fill="#2563eb"/>
+      <text x="168" y="448" fill="#6b6b8a" font-size="6.5" font-style="italic">Unexpected concentrations may indicate forgotten environments</text>
+    </g>
+    <g filter="url(#s)"><rect x="548" y="297" width="350" height="160" rx="7" fill="#1c1c2e"/>
+      <text x="560" y="315" fill="#e4e4f0" font-size="9" font-weight="700">Active vs Idle Ratio</text>
+      <circle cx="660" cy="400" r="50" fill="none" stroke="#2a2a42" stroke-width="16"/>
+      <circle cx="660" cy="400" r="50" fill="none" stroke="#10b981" stroke-width="16" stroke-dasharray="138 176" transform="rotate(-90 660 400)"/>
+      <circle cx="660" cy="400" r="50" fill="none" stroke="#ef4444" stroke-width="16" stroke-dasharray="94 220" stroke-dashoffset="-138" transform="rotate(-90 660 400)"/>
+      <circle cx="660" cy="400" r="50" fill="none" stroke="#f59e0b" stroke-width="16" stroke-dasharray="50 264" stroke-dashoffset="-232" transform="rotate(-90 660 400)"/>
+      <circle cx="760" cy="365" r="4" fill="#10b981"/><text x="770" y="369" fill="#b4b4cc" font-size="8">Active (44%)</text>
+      <circle cx="760" cy="385" r="4" fill="#ef4444"/><text x="770" y="389" fill="#b4b4cc" font-size="8">Idle (30%)</text>
+      <circle cx="760" cy="405" r="4" fill="#f59e0b"/><text x="770" y="409" fill="#b4b4cc" font-size="8">Low (16%)</text>
+      <circle cx="760" cy="425" r="4" fill="#3b82f6"/><text x="770" y="429" fill="#b4b4cc" font-size="8">Review (10%)</text>
+    </g>
+  </g>
+
+  <!-- ===== SCREEN 5: COMPARE ===== -->
+  <g clip-path="url(#mc)" opacity="0">
+    <animate attributeName="opacity" dur="40s" repeatCount="indefinite" values="0;0;0;0;1;0;0;0;0" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/>
+    <rect x="148" y="34" width="772" height="446" fill="#141420"/>
+    <text x="168" y="58" fill="#e4e4f0" font-size="13" font-weight="700">Compare Reports</text>
+    <!-- Selectors -->
+    <g filter="url(#s)"><rect x="168" y="72" width="730" height="45" rx="7" fill="#1c1c2e"/>
+      <text x="180" y="90" fill="#6b6b8a" font-size="7.5" font-weight="600">ACCOUNT</text>
+      <rect x="235" y="80" width="180" height="18" rx="3" fill="#2a2a42"/><text x="245" y="93" fill="#94a3b8" font-size="7.5">PowerUser-123456789012</text>
+      <text x="430" y="90" fill="#6b6b8a" font-size="7.5" font-weight="600">REPORT A</text>
+      <rect x="490" y="80" width="140" height="18" rx="3" fill="#2a2a42"/><text x="500" y="93" fill="#94a3b8" font-size="7.5">May 3, 14:22 (1035 res)</text>
+      <text x="645" y="90" fill="#6b6b8a" font-size="7.5" font-weight="600">REPORT B</text>
+      <rect x="705" y="80" width="140" height="18" rx="3" fill="#2a2a42"/><text x="715" y="93" fill="#94a3b8" font-size="7.5">May 4, 19:59 (1052 res)</text>
+      <rect x="855" y="80" width="40" height="18" rx="3" fill="#2563eb"/><text x="862" y="93" fill="white" font-size="7.5" font-weight="600">Compare</text>
+    </g>
+    <!-- Summary cards -->
+    <g filter="url(#s)"><rect x="168" y="128" width="175" height="48" rx="6" fill="#1c1c2e"/><text x="180" y="146" fill="#6b6b8a" font-size="7" font-weight="600">ADDED</text><text x="180" y="168" fill="#34d399" font-size="22" font-weight="700">+17</text></g>
+    <g filter="url(#s)"><rect x="353" y="128" width="175" height="48" rx="6" fill="#1c1c2e"/><text x="365" y="146" fill="#6b6b8a" font-size="7" font-weight="600">REMOVED</text><text x="365" y="168" fill="#f87171" font-size="22" font-weight="700">-3</text></g>
+    <g filter="url(#s)"><rect x="538" y="128" width="175" height="48" rx="6" fill="#1c1c2e"/><text x="550" y="146" fill="#6b6b8a" font-size="7" font-weight="600">CHANGED</text><text x="550" y="168" fill="#fbbf24" font-size="22" font-weight="700">8</text></g>
+    <g filter="url(#s)"><rect x="723" y="128" width="175" height="48" rx="6" fill="#1c1c2e"/><text x="735" y="146" fill="#6b6b8a" font-size="7" font-weight="600">COST CHANGE</text><text x="735" y="168" fill="#f87171" font-size="22" font-weight="700">+$42</text></g>
+    <!-- New resources -->
+    <g filter="url(#s)"><rect x="168" y="190" width="730" height="110" rx="7" fill="#1c1c2e" style="border-left: 3px solid #10b981"/>
+      <rect x="168" y="190" width="4" height="110" rx="2" fill="#10b981"/>
+      <text x="185" y="210" fill="#34d399" font-size="9" font-weight="700">New Resources</text>
+      <text x="185" y="232" fill="#b4b4cc" font-size="7.5">us-east-1</text><rect x="250" y="222" width="28" height="13" rx="3" fill="rgba(107,107,138,0.15)"/><text x="256" y="232" fill="#b4b4cc" font-size="7">EC2</text><text x="300" y="232" fill="#b4b4cc" font-size="7.5">new-api-server</text><text x="500" y="232" fill="#e4e4f0" font-size="7.5">$70.08</text><rect x="580" y="222" width="42" height="13" rx="3" fill="rgba(52,211,153,0.15)"/><text x="588" y="232" fill="#34d399" font-size="6.5" font-weight="600">Active</text>
+      <text x="185" y="256" fill="#b4b4cc" font-size="7.5">eu-west-1</text><rect x="250" y="246" width="28" height="13" rx="3" fill="rgba(107,107,138,0.15)"/><text x="256" y="256" fill="#b4b4cc" font-size="7">RDS</text><text x="300" y="256" fill="#b4b4cc" font-size="7.5">reporting-db-eu</text><text x="500" y="256" fill="#e4e4f0" font-size="7.5">$124.83</text><rect x="580" y="246" width="75" height="13" rx="3" fill="rgba(251,191,36,0.15)"/><text x="588" y="256" fill="#fbbf24" font-size="6.5" font-weight="600">Low Utilization</text>
+    </g>
+    <!-- Changed resources -->
+    <g filter="url(#s)"><rect x="168" y="310" width="730" height="90" rx="7" fill="#1c1c2e"/>
+      <rect x="168" y="310" width="4" height="90" rx="2" fill="#fbbf24"/>
+      <text x="185" y="330" fill="#fbbf24" font-size="9" font-weight="700">Changed Resources</text>
+      <text x="185" y="352" fill="#b4b4cc" font-size="7.5">us-west-2</text><rect x="250" y="342" width="28" height="13" rx="3" fill="rgba(107,107,138,0.15)"/><text x="256" y="352" fill="#b4b4cc" font-size="7">EC2</text><text x="300" y="352" fill="#b4b4cc" font-size="7.5">batch-worker-03</text><text x="500" y="352" fill="#b4b4cc" font-size="7.5">Cost: $60.74 &#x2192; $30.37</text><text x="700" y="352" fill="#34d399" font-size="7.5">Downsized</text>
+      <text x="185" y="376" fill="#b4b4cc" font-size="7.5">us-east-1</text><rect x="250" y="366" width="42" height="13" rx="3" fill="rgba(107,107,138,0.15)"/><text x="254" y="376" fill="#b4b4cc" font-size="7">Lambda</text><text x="300" y="376" fill="#b4b4cc" font-size="7.5">data-pipeline</text><text x="500" y="376" fill="#b4b4cc" font-size="7.5">State: idle &#x2192; active</text><text x="700" y="376" fill="#34d399" font-size="7.5">Reactivated</text>
+    </g>
+  </g>
+
+  <!-- ===== SCREEN 6: AUDIT TRAIL ===== -->
+  <g clip-path="url(#mc)" opacity="0">
+    <animate attributeName="opacity" dur="40s" repeatCount="indefinite" values="0;0;0;0;0;1;0;0;0" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/>
+    <rect x="148" y="34" width="772" height="446" fill="#141420"/>
+    <text x="168" y="58" fill="#e4e4f0" font-size="13" font-weight="700">Audit Trail</text>
+    <g filter="url(#s)"><rect x="168" y="72" width="730" height="380" rx="7" fill="#1c1c2e"/>
+      <rect x="168" y="72" width="730" height="22" rx="7" fill="#22223a"/><rect x="168" y="86" width="730" height="8" fill="#22223a"/>
+      <text x="180" y="88" fill="#6b6b8a" font-size="6.5" font-weight="600">TIMESTAMP</text>
+      <text x="310" y="88" fill="#6b6b8a" font-size="6.5" font-weight="600">ACCOUNT</text>
+      <text x="450" y="88" fill="#6b6b8a" font-size="6.5" font-weight="600">STATUS</text>
+      <text x="530" y="88" fill="#6b6b8a" font-size="6.5" font-weight="600">RESOURCES</text>
+      <text x="610" y="88" fill="#6b6b8a" font-size="6.5" font-weight="600">COST</text>
+      <text x="680" y="88" fill="#6b6b8a" font-size="6.5" font-weight="600">IDLE</text>
+      <text x="730" y="88" fill="#6b6b8a" font-size="6.5" font-weight="600">AI</text>
+      <text x="770" y="88" fill="#6b6b8a" font-size="6.5" font-weight="600">DURATION</text>
+      <!-- Rows -->
+      <line x1="168" y1="100" x2="898" y2="100" stroke="#2a2a42"/>
+      <text x="180" y="115" fill="#b4b4cc" font-size="7.5">2026-05-04 19:59:29</text><text x="310" y="115" fill="#b4b4cc" font-size="7.5">PowerUser-123456789012</text><rect x="450" y="105" width="48" height="13" rx="3" fill="rgba(52,211,153,0.15)"/><text x="458" y="115" fill="#34d399" font-size="6.5" font-weight="600">complete</text><text x="530" y="115" fill="#e4e4f0" font-size="7.5">1,035</text><text x="610" y="115" fill="#e4e4f0" font-size="7.5">$585.40</text><text x="680" y="115" fill="#fbbf24" font-size="7.5">135</text><text x="730" y="115" fill="#34d399" font-size="7.5">bedrock</text><text x="770" y="115" fill="#6b6b8a" font-size="7.5">3m 42s</text>
+      <line x1="168" y1="124" x2="898" y2="124" stroke="#2a2a42"/>
+      <text x="180" y="139" fill="#b4b4cc" font-size="7.5">2026-05-04 18:15:01</text><text x="310" y="139" fill="#b4b4cc" font-size="7.5">PowerUser-987654321098</text><rect x="450" y="129" width="48" height="13" rx="3" fill="rgba(52,211,153,0.15)"/><text x="458" y="139" fill="#34d399" font-size="6.5" font-weight="600">complete</text><text x="530" y="139" fill="#e4e4f0" font-size="7.5">767</text><text x="610" y="139" fill="#e4e4f0" font-size="7.5">$312.18</text><text x="680" y="139" fill="#fbbf24" font-size="7.5">89</text><text x="730" y="139" fill="#6b6b8a" font-size="7.5">-</text><text x="770" y="139" fill="#6b6b8a" font-size="7.5">2m 18s</text>
+      <line x1="168" y1="148" x2="898" y2="148" stroke="#2a2a42"/>
+      <text x="180" y="163" fill="#b4b4cc" font-size="7.5">2026-05-04 17:30:44</text><text x="310" y="163" fill="#b4b4cc" font-size="7.5">PowerUser-111222333444</text><rect x="450" y="153" width="48" height="13" rx="3" fill="rgba(52,211,153,0.15)"/><text x="458" y="163" fill="#34d399" font-size="6.5" font-weight="600">complete</text><text x="530" y="163" fill="#e4e4f0" font-size="7.5">423</text><text x="610" y="163" fill="#e4e4f0" font-size="7.5">$198.55</text><text x="680" y="163" fill="#fbbf24" font-size="7.5">34</text><text x="730" y="163" fill="#34d399" font-size="7.5">ollama</text><text x="770" y="163" fill="#6b6b8a" font-size="7.5">4m 11s</text>
+      <line x1="168" y1="172" x2="898" y2="172" stroke="#2a2a42"/>
+      <text x="180" y="187" fill="#b4b4cc" font-size="7.5">2026-05-04 16:00:12</text><text x="310" y="187" fill="#b4b4cc" font-size="7.5">PowerUser-555666777888</text><rect x="450" y="177" width="55" height="13" rx="3" fill="rgba(248,113,113,0.15)"/><text x="458" y="187" fill="#f87171" font-size="6.5" font-weight="600">cred_error</text><text x="530" y="187" fill="#6b6b8a" font-size="7.5">0</text><text x="610" y="187" fill="#6b6b8a" font-size="7.5">-</text><text x="680" y="187" fill="#6b6b8a" font-size="7.5">-</text><text x="730" y="187" fill="#6b6b8a" font-size="7.5">-</text><text x="770" y="187" fill="#6b6b8a" font-size="7.5">0.3s</text>
+      <line x1="168" y1="196" x2="898" y2="196" stroke="#2a2a42"/>
+      <text x="180" y="211" fill="#b4b4cc" font-size="7.5">2026-05-03 14:22:08</text><text x="310" y="211" fill="#b4b4cc" font-size="7.5">PowerUser-123456789012</text><rect x="450" y="201" width="48" height="13" rx="3" fill="rgba(52,211,153,0.15)"/><text x="458" y="211" fill="#34d399" font-size="6.5" font-weight="600">complete</text><text x="530" y="211" fill="#e4e4f0" font-size="7.5">1,018</text><text x="610" y="211" fill="#e4e4f0" font-size="7.5">$543.22</text><text x="680" y="211" fill="#fbbf24" font-size="7.5">126</text><text x="730" y="211" fill="#34d399" font-size="7.5">bedrock</text><text x="770" y="211" fill="#6b6b8a" font-size="7.5">3m 55s</text>
+    </g>
+  </g>
+
+  <!-- ===== SCREEN 7: DOCUMENTATION ===== -->
+  <g clip-path="url(#mc)" opacity="0">
+    <animate attributeName="opacity" dur="40s" repeatCount="indefinite" values="0;0;0;0;0;0;1;0;0" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/>
+    <rect x="148" y="34" width="772" height="446" fill="#141420"/>
+    <text x="168" y="58" fill="#e4e4f0" font-size="13" font-weight="700">Documentation</text>
+    <!-- Tabs -->
+    <rect x="168" y="68" width="80" height="22" rx="5" fill="rgba(37,99,235,0.2)"/><text x="182" y="83" fill="#3b82f6" font-size="8.5" font-weight="700">API Reference</text>
+    <rect x="256" y="68" width="55" height="22" rx="5" fill="transparent"/><text x="266" y="83" fill="#6b6b8a" font-size="8.5">How To</text>
+    <rect x="319" y="68" width="90" height="22" rx="5" fill="transparent"/><text x="329" y="83" fill="#6b6b8a" font-size="8.5">Recommendations</text>
+    <rect x="417" y="68" width="70" height="22" rx="5" fill="transparent"/><text x="427" y="83" fill="#6b6b8a" font-size="8.5">Architecture</text>
+    <!-- API Reference content -->
+    <g filter="url(#s)"><rect x="168" y="100" width="730" height="355" rx="7" fill="#1c1c2e"/>
+      <text x="180" y="122" fill="#e4e4f0" font-size="10" font-weight="700">REST API Endpoints</text>
+      <text x="180" y="140" fill="#6b6b8a" font-size="7" font-weight="600">All endpoints return JSON with snake_case field names</text>
+      <!-- Table header -->
+      <rect x="180" y="150" width="700" height="18" rx="4" fill="#22223a"/>
+      <text x="195" y="163" fill="#6b6b8a" font-size="7" font-weight="600">METHOD</text>
+      <text x="260" y="163" fill="#6b6b8a" font-size="7" font-weight="600">PATH</text>
+      <text x="500" y="163" fill="#6b6b8a" font-size="7" font-weight="600">DESCRIPTION</text>
+      <!-- Rows -->
+      <rect x="195" y="176" width="32" height="13" rx="3" fill="rgba(16,185,129,0.15)"/><text x="201" y="186" fill="#34d399" font-size="7" font-weight="600">GET</text>
+      <text x="260" y="186" fill="#a78bfa" font-size="7.5" font-weight="600">/profiles</text><text x="500" y="186" fill="#b4b4cc" font-size="7.5">List AWS credential profiles</text>
+
+      <rect x="195" y="196" width="32" height="13" rx="3" fill="rgba(16,185,129,0.15)"/><text x="201" y="206" fill="#34d399" font-size="7" font-weight="600">GET</text>
+      <text x="260" y="206" fill="#a78bfa" font-size="7.5" font-weight="600">/regions</text><text x="500" y="206" fill="#b4b4cc" font-size="7.5">List all 30 AWS regions</text>
+
+      <rect x="195" y="216" width="36" height="13" rx="3" fill="rgba(245,158,11,0.15)"/><text x="199" y="226" fill="#fbbf24" font-size="7" font-weight="600">POST</text>
+      <text x="260" y="226" fill="#a78bfa" font-size="7.5" font-weight="600">/analyse</text><text x="500" y="226" fill="#b4b4cc" font-size="7.5">Submit analysis job for a profile</text>
+
+      <rect x="195" y="236" width="36" height="13" rx="3" fill="rgba(245,158,11,0.15)"/><text x="199" y="246" fill="#fbbf24" font-size="7" font-weight="600">POST</text>
+      <text x="260" y="246" fill="#a78bfa" font-size="7.5" font-weight="600">/analyse/batch</text><text x="500" y="246" fill="#b4b4cc" font-size="7.5">Batch scan all profiles (3 concurrent)</text>
+
+      <rect x="195" y="256" width="32" height="13" rx="3" fill="rgba(16,185,129,0.15)"/><text x="201" y="266" fill="#34d399" font-size="7" font-weight="600">GET</text>
+      <text x="260" y="266" fill="#a78bfa" font-size="7.5" font-weight="600">/analyse/job?jobId=</text><text x="500" y="266" fill="#b4b4cc" font-size="7.5">Get job status and progress</text>
+
+      <rect x="195" y="276" width="32" height="13" rx="3" fill="rgba(16,185,129,0.15)"/><text x="201" y="286" fill="#34d399" font-size="7" font-weight="600">GET</text>
+      <text x="260" y="286" fill="#a78bfa" font-size="7.5" font-weight="600">/analyse/cached</text><text x="500" y="286" fill="#b4b4cc" font-size="7.5">Get latest cached report for profile</text>
+
+      <rect x="195" y="296" width="32" height="13" rx="3" fill="rgba(16,185,129,0.15)"/><text x="201" y="306" fill="#34d399" font-size="7" font-weight="600">GET</text>
+      <text x="260" y="306" fill="#a78bfa" font-size="7.5" font-weight="600">/analyse/compare</text><text x="500" y="306" fill="#b4b4cc" font-size="7.5">Compare two reports (added/removed/changed)</text>
+
+      <rect x="195" y="316" width="36" height="13" rx="3" fill="rgba(245,158,11,0.15)"/><text x="199" y="326" fill="#fbbf24" font-size="7" font-weight="600">POST</text>
+      <text x="260" y="326" fill="#a78bfa" font-size="7.5" font-weight="600">/export/csv</text><text x="500" y="326" fill="#b4b4cc" font-size="7.5">Export resources to CSV</text>
+
+      <rect x="195" y="336" width="36" height="13" rx="3" fill="rgba(245,158,11,0.15)"/><text x="199" y="346" fill="#fbbf24" font-size="7" font-weight="600">POST</text>
+      <text x="260" y="346" fill="#a78bfa" font-size="7.5" font-weight="600">/pricing/refresh</text><text x="500" y="346" fill="#b4b4cc" font-size="7.5">Refresh pricing from AWS Pricing API</text>
+
+      <rect x="195" y="356" width="32" height="13" rx="3" fill="rgba(16,185,129,0.15)"/><text x="201" y="366" fill="#34d399" font-size="7" font-weight="600">GET</text>
+      <text x="260" y="366" fill="#a78bfa" font-size="7.5" font-weight="600">/ai/status</text><text x="500" y="366" fill="#b4b4cc" font-size="7.5">Check Ollama + Bedrock availability</text>
+
+      <rect x="195" y="376" width="32" height="13" rx="3" fill="rgba(16,185,129,0.15)"/><text x="201" y="386" fill="#34d399" font-size="7" font-weight="600">GET</text>
+      <text x="260" y="386" fill="#a78bfa" font-size="7.5" font-weight="600">/swagger-ui.html</text><text x="500" y="386" fill="#b4b4cc" font-size="7.5">Interactive Swagger API docs</text>
+
+      <text x="180" y="420" fill="#6b6b8a" font-size="7.5" font-style="italic">Full interactive documentation available at /swagger-ui.html</text>
+      <rect x="680" y="408" width="85" height="20" rx="4" fill="rgba(37,99,235,0.15)"/><text x="693" y="422" fill="#3b82f6" font-size="8" font-weight="600">Open Swagger</text>
+    </g>
+  </g>
+
+  <!-- ===== SCREEN 8: ABOUT ===== -->
+  <g clip-path="url(#mc)" opacity="0">
+    <animate attributeName="opacity" dur="40s" repeatCount="indefinite" values="0;0;0;0;0;0;0;1;0" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/>
+    <rect x="148" y="34" width="772" height="446" fill="#141420"/>
+    <text x="168" y="58" fill="#e4e4f0" font-size="13" font-weight="700">About</text>
+    <!-- Version -->
+    <g filter="url(#s)"><rect x="168" y="72" width="730" height="60" rx="7" fill="#1c1c2e"/>
+      <text x="180" y="92" fill="#e4e4f0" font-size="10" font-weight="700">Cloud Resource Sentinel</text>
+      <text x="180" y="110" fill="#b4b4cc" font-size="8.5">Version 2.0 | Java 21 | Spring Boot 4 | Spring AI</text>
+      <text x="180" y="124" fill="#6b6b8a" font-size="8">AI-powered cloud resource analysis and cost optimisation</text>
+    </g>
+    <!-- Pricing -->
+    <g filter="url(#s)"><rect x="168" y="142" width="730" height="72" rx="7" fill="#1c1c2e"/>
+      <text x="180" y="162" fill="#e4e4f0" font-size="10" font-weight="700">Pricing Data</text>
+      <text x="180" y="180" fill="#b4b4cc" font-size="8.5">Regional pricing for all 30 AWS regions</text>
+      <text x="180" y="198" fill="#6b6b8a" font-size="8">Last updated: 2026-05-04</text>
+      <rect x="790" y="168" width="95" height="22" rx="4" fill="rgba(37,99,235,0.2)"/><text x="805" y="183" fill="#3b82f6" font-size="8" font-weight="600">Refresh from AWS</text>
+    </g>
+    <!-- Progress bar -->
+    <rect x="180" y="208" width="700" height="3" rx="1.5" fill="#2a2a42"/>
+    <rect x="180" y="208" width="0" height="3" rx="1.5" fill="#10b981"><animate attributeName="width" values="0;700" dur="4s" repeatCount="indefinite"/></rect>
+    <text x="530" y="222" text-anchor="middle" fill="#10b981" font-size="7.5">Fetching EC2 pricing... 35%</text>
+    <!-- Capabilities -->
+    <g filter="url(#s)"><rect x="168" y="232" width="355" height="220" rx="7" fill="#1c1c2e"/>
+      <text x="180" y="252" fill="#e4e4f0" font-size="10" font-weight="700">Capabilities</text>
+      <text x="188" y="274" fill="#34d399" font-size="8">&#x2713;</text><text x="202" y="274" fill="#b4b4cc" font-size="8">23 AWS resource type scanners</text>
+      <text x="188" y="294" fill="#34d399" font-size="8">&#x2713;</text><text x="202" y="294" fill="#b4b4cc" font-size="8">30 regions with per-region pricing</text>
+      <text x="188" y="314" fill="#34d399" font-size="8">&#x2713;</text><text x="202" y="314" fill="#b4b4cc" font-size="8">AI analysis via Bedrock + Ollama</text>
+      <text x="188" y="334" fill="#34d399" font-size="8">&#x2713;</text><text x="202" y="334" fill="#b4b4cc" font-size="8">Multi-account batch scanning</text>
+      <text x="188" y="354" fill="#34d399" font-size="8">&#x2713;</text><text x="202" y="354" fill="#b4b4cc" font-size="8">Report comparison and diff tracking</text>
+      <text x="188" y="374" fill="#34d399" font-size="8">&#x2713;</text><text x="202" y="374" fill="#b4b4cc" font-size="8">14 statistics charts</text>
+      <text x="188" y="394" fill="#34d399" font-size="8">&#x2713;</text><text x="202" y="394" fill="#b4b4cc" font-size="8">CSV export and audit trail</text>
+      <text x="188" y="414" fill="#34d399" font-size="8">&#x2713;</text><text x="202" y="414" fill="#b4b4cc" font-size="8">Swagger API documentation</text>
+      <text x="188" y="434" fill="#34d399" font-size="8">&#x2713;</text><text x="202" y="434" fill="#b4b4cc" font-size="8">Hot-reload pricing without restart</text>
+    </g>
+    <!-- Credits + Tech -->
+    <g filter="url(#s)"><rect x="533" y="232" width="365" height="78" rx="7" fill="#1c1c2e"/>
+      <text x="545" y="252" fill="#e4e4f0" font-size="10" font-weight="700">Credits</text>
+      <text x="545" y="272" fill="#b4b4cc" font-size="8.5">Built with Claude</text>
+      <text x="545" y="292" fill="#6b6b8a" font-size="8">AI-assisted development for cloud resource analysis</text>
+    </g>
+    <g filter="url(#s)"><rect x="533" y="320" width="365" height="132" rx="7" fill="#1c1c2e"/>
+      <text x="545" y="340" fill="#e4e4f0" font-size="10" font-weight="700">Tech Stack</text>
+      <rect x="545" y="352" width="70" height="18" rx="4" fill="rgba(37,99,235,0.2)"/><text x="555" y="365" fill="#3b82f6" font-size="8">Spring Boot 4</text>
+      <rect x="625" y="352" width="55" height="18" rx="4" fill="rgba(124,92,252,0.2)"/><text x="635" y="365" fill="#a78bfa" font-size="8">Spring AI</text>
+      <rect x="690" y="352" width="45" height="18" rx="4" fill="rgba(16,185,129,0.2)"/><text x="700" y="365" fill="#34d399" font-size="8">Java 21</text>
+      <rect x="745" y="352" width="55" height="18" rx="4" fill="rgba(245,158,11,0.2)"/><text x="755" y="365" fill="#fbbf24" font-size="8">AWS SDK</text>
+      <rect x="545" y="378" width="60" height="18" rx="4" fill="rgba(6,182,212,0.2)"/><text x="555" y="391" fill="#22d3ee" font-size="8">Thymeleaf</text>
+      <rect x="615" y="378" width="60" height="18" rx="4" fill="rgba(239,68,68,0.2)"/><text x="625" y="391" fill="#f87171" font-size="8">Bootstrap</text>
+      <rect x="685" y="378" width="70" height="18" rx="4" fill="rgba(52,211,153,0.2)"/><text x="695" y="391" fill="#34d399" font-size="8">OpenAPI 3</text>
+      <rect x="545" y="404" width="65" height="18" rx="4" fill="rgba(107,107,138,0.2)"/><text x="555" y="417" fill="#b4b4cc" font-size="8">Caffeine</text>
+      <rect x="620" y="404" width="80" height="18" rx="4" fill="rgba(107,107,138,0.2)"/><text x="630" y="417" fill="#b4b4cc" font-size="8">Virtual Threads</text>
+      <rect x="710" y="404" width="60" height="18" rx="4" fill="rgba(107,107,138,0.2)"/><text x="720" y="417" fill="#b4b4cc" font-size="8">Jackson 3</text>
+    </g>
+  </g>
+
+  <!-- Page indicator dots + labels (8 dots) -->
+  <g>
+    <circle cx="400" cy="472" r="3"><animate attributeName="fill" dur="40s" repeatCount="indefinite" values="#a78bfa;#3a3a5a;#3a3a5a;#3a3a5a;#3a3a5a;#3a3a5a;#3a3a5a;#3a3a5a;#a78bfa" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/></circle>
+    <circle cx="415" cy="472" r="3"><animate attributeName="fill" dur="40s" repeatCount="indefinite" values="#3a3a5a;#a78bfa;#3a3a5a;#3a3a5a;#3a3a5a;#3a3a5a;#3a3a5a;#3a3a5a;#3a3a5a" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/></circle>
+    <circle cx="430" cy="472" r="3"><animate attributeName="fill" dur="40s" repeatCount="indefinite" values="#3a3a5a;#3a3a5a;#a78bfa;#3a3a5a;#3a3a5a;#3a3a5a;#3a3a5a;#3a3a5a;#3a3a5a" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/></circle>
+    <circle cx="445" cy="472" r="3"><animate attributeName="fill" dur="40s" repeatCount="indefinite" values="#3a3a5a;#3a3a5a;#3a3a5a;#a78bfa;#3a3a5a;#3a3a5a;#3a3a5a;#3a3a5a;#3a3a5a" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/></circle>
+    <circle cx="460" cy="472" r="3"><animate attributeName="fill" dur="40s" repeatCount="indefinite" values="#3a3a5a;#3a3a5a;#3a3a5a;#3a3a5a;#a78bfa;#3a3a5a;#3a3a5a;#3a3a5a;#3a3a5a" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/></circle>
+    <circle cx="475" cy="472" r="3"><animate attributeName="fill" dur="40s" repeatCount="indefinite" values="#3a3a5a;#3a3a5a;#3a3a5a;#3a3a5a;#3a3a5a;#a78bfa;#3a3a5a;#3a3a5a;#3a3a5a" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/></circle>
+    <circle cx="490" cy="472" r="3"><animate attributeName="fill" dur="40s" repeatCount="indefinite" values="#3a3a5a;#3a3a5a;#3a3a5a;#3a3a5a;#3a3a5a;#3a3a5a;#a78bfa;#3a3a5a;#3a3a5a" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/></circle>
+    <circle cx="505" cy="472" r="3"><animate attributeName="fill" dur="40s" repeatCount="indefinite" values="#3a3a5a;#3a3a5a;#3a3a5a;#3a3a5a;#3a3a5a;#3a3a5a;#3a3a5a;#a78bfa;#3a3a5a" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/></circle>
+  </g>
+  <text x="453" y="468" text-anchor="middle" fill="#94a3b8" font-size="7.5" font-weight="600" opacity="0"><animate attributeName="opacity" dur="40s" repeatCount="indefinite" values="1;0;0;0;0;0;0;0;1" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/>Dashboard</text>
+  <text x="453" y="468" text-anchor="middle" fill="#94a3b8" font-size="7.5" font-weight="600" opacity="0"><animate attributeName="opacity" dur="40s" repeatCount="indefinite" values="0;1;0;0;0;0;0;0;0" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/>Analyse</text>
+  <text x="453" y="468" text-anchor="middle" fill="#94a3b8" font-size="7.5" font-weight="600" opacity="0"><animate attributeName="opacity" dur="40s" repeatCount="indefinite" values="0;0;1;0;0;0;0;0;0" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/>Resources</text>
+  <text x="453" y="468" text-anchor="middle" fill="#94a3b8" font-size="7.5" font-weight="600" opacity="0"><animate attributeName="opacity" dur="40s" repeatCount="indefinite" values="0;0;0;1;0;0;0;0;0" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/>Stats</text>
+  <text x="453" y="468" text-anchor="middle" fill="#94a3b8" font-size="7.5" font-weight="600" opacity="0"><animate attributeName="opacity" dur="40s" repeatCount="indefinite" values="0;0;0;0;1;0;0;0;0" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/>Compare</text>
+  <text x="453" y="468" text-anchor="middle" fill="#94a3b8" font-size="7.5" font-weight="600" opacity="0"><animate attributeName="opacity" dur="40s" repeatCount="indefinite" values="0;0;0;0;0;1;0;0;0" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/>Audit Trail</text>
+  <text x="453" y="468" text-anchor="middle" fill="#94a3b8" font-size="7.5" font-weight="600" opacity="0"><animate attributeName="opacity" dur="40s" repeatCount="indefinite" values="0;0;0;0;0;0;1;0;0" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/>Documentation</text>
+  <text x="453" y="468" text-anchor="middle" fill="#94a3b8" font-size="7.5" font-weight="600" opacity="0"><animate attributeName="opacity" dur="40s" repeatCount="indefinite" values="0;0;0;0;0;0;0;1;0" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"/>About</text>
+</svg>

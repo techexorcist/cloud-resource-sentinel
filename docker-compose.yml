@@ -1,0 +1,76 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: sentinel-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:11434/api/tags || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+        reservations:
+          memory: 1G
+    networks:
+      - internal-network
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sentinel-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ~/.aws:/home/sentinel/.aws:ro
+      - sentinel-data:/home/sentinel/.cloud-sentinel
+    environment:
+      - AWS_SHARED_CREDENTIALS_FILE=/home/sentinel/.aws/credentials
+      - AWS_CONFIG_FILE=/home/sentinel/.aws/config
+      - OLLAMA_HOST=http://ollama:11434
+    restart: unless-stopped
+    depends_on:
+      ollama:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8000/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    # Security hardening
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 768M
+    networks:
+      - internal-network
+      - egress-network
+
+networks:
+  internal-network:
+    driver: bridge
+    internal: true
+  egress-network:
+    driver: bridge
+
+volumes:
+  ollama-data:
+  sentinel-data:

@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{pages/layout/fragments/head :: head('Documentation')}">
+    <title>Documentation — Cloud Resource Sentinel</title>
+</head>
+<body>
+    <div th:replace="~{pages/layout/fragments/header :: header}"></div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <nav th:replace="~{pages/layout/fragments/sidebar :: sidebar}"></nav>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2 fw-bold" style="color: var(--text-primary);">Documentation</h1>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="reloadDocs()">Reload from YAML</button>
+                </div>
+
+                <!-- Dynamic tabs from YAML -->
+                <ul class="nav nav-tabs mb-4" id="docTabs" role="tablist">
+                    <li class="nav-item" role="presentation" th:each="tab, iter : ${docTabs}">
+                        <button class="nav-link" th:classappend="${iter.index == 0 ? 'active' : ''}"
+                                th:id="${tab['id']} + '-tab'"
+                                data-bs-toggle="tab"
+                                th:attr="data-bs-target='#' + ${tab['id']}"
+                                type="button" role="tab"
+                                th:text="${tab['title']}">Tab</button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="docTabContent">
+                    <th:block th:each="tab, iter : ${docTabs}">
+                        <div class="tab-pane fade" th:classappend="${iter.index == 0 ? 'show active' : ''}"
+                             th:id="${tab['id']}" role="tabpanel">
+
+                            <!-- Intro text -->
+                            <p th:if="${tab['intro']}" class="mb-4" style="color: var(--text-secondary);" th:text="${tab['intro']}"></p>
+
+                            <!-- Recommendation categories (for recommendations tab) -->
+                            <div th:if="${tab['categories']}" class="row g-3 mb-4">
+                                <div class="col-md-3" th:each="cat : ${tab['categories']}">
+                                    <div class="card border-0 shadow-sm h-100" th:style="'border-left: 4px solid ' + ${cat['color']} + ' !important'">
+                                        <div class="card-body py-3">
+                                            <h6 class="fw-bold mb-1" th:classappend="'text-' + ${cat['css']}" th:text="${cat['name']}"></h6>
+                                            <p class="small mb-0" style="color: var(--text-secondary);" th:text="${cat['description']}"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- FAQ type (how-to tab) -->
+                            <th:block th:if="${tab['type'] == 'faq'}">
+                                <div class="mb-4">
+                                    <label class="form-label fw-semibold mb-2">Frequently Asked Questions</label>
+                                    <select class="form-select" style="max-width:480px;" onchange="showFaq(this.value)">
+                                        <option value="">— select a topic —</option>
+                                        <option th:each="q : ${tab['questions']}" th:value="${q['id']}" th:text="${q['title']}"></option>
+                                    </select>
+                                </div>
+                                <div th:each="q : ${tab['questions']}" th:id="'faq-' + ${q['id']}" class="d-none">
+                                    <div class="rounded-3 p-4 mb-4" style="background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: white;">
+                                        <h4 class="mb-1 fw-bold" th:text="${q['banner']}"></h4>
+                                        <p class="mb-0" style="opacity:0.88;" th:text="${q['subtitle']}"></p>
+                                    </div>
+                                    <div class="d-flex flex-column gap-3">
+                                        <div th:each="s : ${q['steps']}" class="card border-0 shadow-sm"
+                                             th:style="'border-left: 4px solid var(--accent-' + ${s['color']} + ') !important'">
+                                            <div class="card-body">
+                                                <div class="d-flex align-items-center gap-3 mb-2">
+                                                    <span class="badge px-3 py-2" th:classappend="'bg-' + ${s['color']}"
+                                                          th:text="'Step ' + ${s['step']}"></span>
+                                                    <h5 class="mb-0" style="color: var(--text-primary);" th:text="${s['title']}"></h5>
+                                                </div>
+                                                <p class="mb-0" style="color: var(--text-secondary);" th:text="${s['text']}"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </th:block>
+
+                            <!-- Sections-based tabs (api, architecture, setup) -->
+                            <th:block th:if="${tab['sections']}">
+                                <div th:each="section : ${tab['sections']}" class="card border-0 shadow-sm mb-4">
+                                    <div class="card-header bg-transparent border-0">
+                                        <strong style="color: var(--text-primary);" th:text="${section['title']}"></strong>
+                                    </div>
+                                    <div class="card-body" th:switch="${section['type']}">
+
+                                        <!-- Note type -->
+                                        <th:block th:case="'note'">
+                                            <p style="color: var(--text-secondary);" th:text="${section['text']}"></p>
+                                            <a th:if="${section['link']}" th:href="${section['link']}" class="btn btn-sm btn-outline-primary" target="_blank" th:text="${section['link_text'] ?: 'Open'}"></a>
+                                        </th:block>
+
+                                        <!-- Table type -->
+                                        <th:block th:case="'table'">
+                                            <div class="p-0 table-responsive">
+                                                <table class="table table-hover table-sm mb-0">
+                                                    <thead>
+                                                        <tr>
+                                                            <th th:each="col : ${section['columns']}" th:text="${col}"></th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr th:each="row : ${section['rows']}">
+                                                            <td th:each="cell, cIter : ${row}">
+                                                                <span th:if="${cIter.index == 0}" class="badge"
+                                                                      th:classappend="${cell == 'GET' ? 'bg-success' : (cell == 'POST' ? 'bg-primary' : (cell == 'PUT' ? 'bg-warning' : (cell == 'DELETE' ? 'bg-danger' : 'bg-secondary')))}"
+                                                                      th:text="${cell}"></span>
+                                                                <code th:if="${cIter.index == 1}" th:text="${cell}"></code>
+                                                                <span th:if="${cIter.index > 1}" th:text="${cell}"></span>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </th:block>
+
+                                        <!-- Code type -->
+                                        <th:block th:case="'code'">
+                                            <pre style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; color: var(--text-primary); font-size: 0.85rem; overflow-x: auto;"
+                                                 th:text="${section['content']}"></pre>
+                                            <div th:if="${section['details']}" class="row g-3 mt-2">
+                                                <div class="col-md-6" th:each="detail : ${section['details']}">
+                                                    <h6 style="color: var(--text-primary);" th:text="${detail['heading']}"></h6>
+                                                    <ul class="small" style="color: var(--text-secondary);">
+                                                        <li th:each="item : ${detail['items']}" th:text="${item}"></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </th:block>
+
+                                        <!-- Badges type -->
+                                        <th:block th:case="'badges'">
+                                            <div class="row g-2">
+                                                <div th:each="item : ${section['items']}" class="col-md-4">
+                                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                                        <span class="badge" th:classappend="'bg-' + ${item['color']}" th:text="${item['badge']}"></span>
+                                                        <span th:text="${item['text']}"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </th:block>
+
+                                        <!-- Cards type -->
+                                        <th:block th:case="'cards'">
+                                            <div class="row g-4">
+                                                <div th:each="card : ${section['items']}" class="col-md-4">
+                                                    <div class="card h-100 border-0 shadow-sm"
+                                                         th:style="'border-left: 4px solid var(--accent-' + ${card['color']} + ') !important'">
+                                                        <div class="card-body">
+                                                            <h6 class="fw-bold" style="color: var(--text-primary);" th:text="${card['title']}"></h6>
+                                                            <ul class="small mb-0" style="color: var(--text-secondary);">
+                                                                <li th:each="li : ${card['items']}" th:text="${li}"></li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </th:block>
+
+                                        <!-- Flow type -->
+                                        <th:block th:case="'flow'">
+                                            <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center">
+                                                <th:block th:each="step, sIter : ${section['steps']}">
+                                                    <span th:if="${sIter.index > 0}" style="color: var(--text-muted);">&rarr;</span>
+                                                    <span class="badge px-3 py-2"
+                                                          th:classappend="'bg-' + ${step['color']}"
+                                                          th:text="${step['label']}"
+                                                          th:title="${step['tooltip']}"
+                                                          data-bs-toggle="tooltip"
+                                                          data-bs-placement="bottom"
+                                                          style="cursor: help;"></span>
+                                                </th:block>
+                                            </div>
+                                            <script>
+                                                document.addEventListener('DOMContentLoaded', function() {
+                                                    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) {
+                                                        new bootstrap.Tooltip(el);
+                                                    });
+                                                });
+                                            </script>
+                                        </th:block>
+
+                                        <!-- Columns type -->
+                                        <th:block th:case="'columns'">
+                                            <div class="row g-3">
+                                                <div class="col-md-6" th:each="col : ${section['columns']}">
+                                                    <h6 style="color: var(--text-primary);" th:text="${col['heading']}"></h6>
+                                                    <ul class="small" style="color: var(--text-secondary);">
+                                                        <li th:each="item : ${col['items']}" th:text="${item}"></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </th:block>
+                                    </div>
+                                </div>
+                            </th:block>
+
+                            <!-- Recommendation groups (for recommendations tab) -->
+                            <th:block th:if="${tab['groups']}">
+                                <div th:each="group : ${tab['groups']}" class="card border-0 shadow-sm mb-3">
+                                    <div class="card-header bg-transparent border-0">
+                                        <strong style="color: var(--text-primary);" th:text="${group['title']}"></strong>
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <div class="table-responsive">
+                                            <table class="table table-sm mb-0" style="color: var(--text-primary);">
+                                                <thead><tr><th style="width:12%">Resource</th><th style="width:28%">Recommendation</th><th style="width:35%">Condition</th><th>Metric Source</th></tr></thead>
+                                                <tbody>
+                                                    <th:block th:each="res : ${group['resources']}">
+                                                        <tr th:each="rule, rIter : ${res['rules']}">
+                                                            <td th:if="${rIter.index == 0}" th:rowspan="${#lists.size(res['rules'])}">
+                                                                <span class="badge" th:classappend="'bg-' + ${res['color']}" th:text="${res['type']}"></span>
+                                                            </td>
+                                                            <td>
+                                                                <span th:if="${rule['css']}" th:classappend="'text-' + ${rule['css']}" th:text="${rule['recommendation']}"></span>
+                                                                <span th:unless="${rule['css']}" th:text="${rule['recommendation']}"></span>
+                                                            </td>
+                                                            <td th:text="${rule['condition']}"></td>
+                                                            <td th:text="${rule['source']}"></td>
+                                                        </tr>
+                                                    </th:block>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </th:block>
+
+                            <!-- Metrics note (for recommendations tab) -->
+                            <div th:if="${tab['metrics_note']}" class="card border-0 shadow-sm">
+                                <div class="card-header bg-transparent border-0">
+                                    <strong style="color: var(--text-primary);" th:text="${tab['metrics_note']['title']}"></strong>
+                                </div>
+                                <div class="card-body" style="color: var(--text-secondary);">
+                                    <p class="mb-2" th:text="${tab['metrics_note']['text']}"></p>
+                                    <div class="d-flex flex-wrap gap-2 mb-3">
+                                        <code th:each="kw : ${tab['metrics_note']['keywords']}" th:text="${kw}"></code>
+                                    </div>
+                                    <p class="mb-0" th:text="${tab['metrics_note']['footer']}"></p>
+                                </div>
+                            </div>
+
+                        </div>
+                    </th:block>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/sentinel.js(v=1747030000)}"></script>
+    <script>
+        function showFaq(type) {
+            document.querySelectorAll('[id^="faq-"]').forEach(function(el) { el.classList.add('d-none'); });
+            if (type) {
+                var target = document.getElementById('faq-' + type);
+                if (target) target.classList.remove('d-none');
+            }
+        }
+
+        function reloadDocs() {
+            fetch('/docs/reload', { method: 'POST' })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    showToast('Documentation reloaded (' + data.tabs + ' tabs)', 'info');
+                    setTimeout(function() { location.reload(); }, 500);
+                })
+                .catch(function() { showToast('Failed to reload docs'); });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var savedTab = localStorage.getItem('docsActiveTab') || 'api';
+            var tabButton = document.getElementById(savedTab + '-tab');
+            if (tabButton) new bootstrap.Tab(tabButton).show();
+
+            document.querySelectorAll('#docTabs button[data-bs-toggle="tab"]').forEach(function(button) {
+                button.addEventListener('shown.bs.tab', function(event) {
+                    localStorage.setItem('docsActiveTab', event.target.id.replace('-tab', ''));
+                });
+            });
+        });
+    </script>
+</body>
+</html>

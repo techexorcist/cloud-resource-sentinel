@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{pages/layout/fragments/head :: head('Compare Reports')}">
+    <title>Compare Reports — Cloud Resource Sentinel</title>
+</head>
+<body>
+    <div th:replace="~{pages/layout/fragments/header :: header}"></div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <nav th:replace="~{pages/layout/fragments/sidebar :: sidebar}"></nav>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2 fw-bold" style="color: var(--text-primary);">Compare Reports</h1>
+                </div>
+
+                <!-- Profile & Report Selection -->
+                <div class="card border-0 shadow-sm mb-3">
+                    <div class="card-body py-3">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold" style="color: var(--text-muted);">Account Profile</label>
+                                <select class="form-select form-select-sm" id="compareProfile">
+                                    <option value="">Select profile...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-semibold" style="color: var(--text-muted);">Older Report</label>
+                                <select class="form-select form-select-sm" id="compareReportA" disabled>
+                                    <option value="">Select report...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-semibold" style="color: var(--text-muted);">Newer Report</label>
+                                <select class="form-select form-select-sm" id="compareReportB" disabled>
+                                    <option value="">Select report...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-primary btn-sm w-100 fw-semibold" id="compareBtn" disabled onclick="runCompare()">Compare</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Empty State -->
+                <div id="compareEmptyState" class="text-center py-5">
+                    <div style="font-size: 2.5rem;" class="mb-3">&#x1f504;</div>
+                    <h5 style="color: var(--text-primary);">Compare scan reports side by side</h5>
+                    <p class="text-muted mb-0">Select a profile with multiple cached reports to see what changed between scans.<br>
+                    Up to 3 reports are kept per account.</p>
+                </div>
+
+                <!-- Comparison Results -->
+                <div id="compareResults" style="display:none;">
+                    <!-- Category mismatch warning -->
+                    <div id="cmpCategoryWarning" style="display:none;"></div>
+                    <!-- Summary Cards -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-3">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-body py-3 text-center">
+                                    <small class="text-uppercase fw-semibold" style="color: var(--text-muted); font-size: 0.65rem;">Added</small>
+                                    <h3 class="fw-bold mb-0" id="cmpAdded" style="color: var(--accent-success);">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-body py-3 text-center">
+                                    <small class="text-uppercase fw-semibold" style="color: var(--text-muted); font-size: 0.65rem;">Removed</small>
+                                    <h3 class="fw-bold mb-0" id="cmpRemoved" style="color: var(--accent-danger);">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-body py-3 text-center">
+                                    <small class="text-uppercase fw-semibold" style="color: var(--text-muted); font-size: 0.65rem;">Changed</small>
+                                    <h3 class="fw-bold mb-0" id="cmpChanged" style="color: var(--accent-warning);">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-body py-3 text-center">
+                                    <small class="text-uppercase fw-semibold" style="color: var(--text-muted); font-size: 0.65rem;" title="Positive (red) = cost increased since older report. Negative (green) = cost decreased (savings achieved).">Cost Change</small>
+                                    <h3 class="fw-bold mb-0" id="cmpCostChange" title="Newer report cost minus older report cost">$0</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Security / Governance delta row -->
+                    <div class="row g-3 mb-3" id="cmpFindingDeltas" style="display:none;">
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm" style="border-left: 3px solid #f56565 !important;">
+                                <div class="card-body py-2 text-center">
+                                    <small class="text-uppercase fw-semibold" style="color: var(--text-muted); font-size: 0.6rem;">Security Findings Delta</small>
+                                    <h5 class="fw-bold mb-0" id="cmpSecDelta">0</h5>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm" style="border-left: 3px solid #667eea !important;">
+                                <div class="card-body py-2 text-center">
+                                    <small class="text-uppercase fw-semibold" style="color: var(--text-muted); font-size: 0.6rem;">Governance Findings Delta</small>
+                                    <h5 class="fw-bold mb-0" id="cmpGovDelta">0</h5>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm" style="border-left: 3px solid #ed8936 !important;">
+                                <div class="card-body py-2 text-center">
+                                    <small class="text-uppercase fw-semibold" style="color: var(--text-muted); font-size: 0.6rem;">Cost Findings Delta</small>
+                                    <h5 class="fw-bold mb-0" id="cmpCostDelta">0</h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Report timestamps -->
+                    <div class="card border-0 shadow-sm mb-3">
+                        <div class="card-body py-2">
+                            <div class="d-flex justify-content-between small">
+                                <div><strong style="color: var(--text-primary);">Report A:</strong> <span id="cmpReportAInfo" style="color: var(--text-secondary);"></span></div>
+                                <div><strong style="color: var(--text-primary);">Report B:</strong> <span id="cmpReportBInfo" style="color: var(--text-secondary);"></span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Added Resources -->
+                    <div id="cmpAddedSection" style="display:none;" class="mb-3">
+                        <div class="card border-0 shadow-sm" style="border-left: 4px solid var(--accent-success) !important;">
+                            <div class="card-header bg-transparent border-0 py-2">
+                                <strong class="small" style="color: var(--accent-success);">New Resources</strong>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-sm mb-0">
+                                        <thead><tr><th>Region</th><th>Type</th><th>Name</th><th>ID</th><th>Cost</th><th>Recommendation</th></tr></thead>
+                                        <tbody id="cmpAddedBody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Removed Resources -->
+                    <div id="cmpRemovedSection" style="display:none;" class="mb-3">
+                        <div class="card border-0 shadow-sm" style="border-left: 4px solid var(--accent-danger) !important;">
+                            <div class="card-header bg-transparent border-0 py-2">
+                                <strong class="small" style="color: var(--accent-danger);">Removed Resources</strong>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-sm mb-0">
+                                        <thead><tr><th>Region</th><th>Type</th><th>Name</th><th>ID</th><th>Cost</th><th>Recommendation</th></tr></thead>
+                                        <tbody id="cmpRemovedBody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Changed Resources -->
+                    <div id="cmpChangedSection" style="display:none;" class="mb-3">
+                        <div class="card border-0 shadow-sm" style="border-left: 4px solid var(--accent-warning) !important;">
+                            <div class="card-header bg-transparent border-0 py-2">
+                                <strong class="small" style="color: var(--accent-warning);">Changed Resources</strong>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-sm mb-0">
+                                        <thead><tr><th>Region</th><th>Type</th><th>Name</th><th>ID</th><th>Change</th></tr></thead>
+                                        <tbody id="cmpChangedBody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- No Changes -->
+                    <div id="cmpNoChanges" style="display:none;" class="text-center py-4">
+                        <h5 style="color: var(--text-primary);">No differences found</h5>
+                        <p class="text-muted">The two reports have identical resources.</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/sentinel.js(v=1747030000)}"></script>
+    <script>
+        function cmpResolveAccountId(profileName) {
+            if (!profileName) return 'default';
+            var parts = profileName.split('-');
+            if (parts.length >= 2) {
+                var last = parts[parts.length - 1];
+                if (/^\d{12}$/.test(last)) return last;
+            }
+            return profileName;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var profileSelect = document.getElementById('compareProfile');
+            var reportASelect = document.getElementById('compareReportA');
+            var reportBSelect = document.getElementById('compareReportB');
+            var compareBtn = document.getElementById('compareBtn');
+
+            // Load profiles with cache counts
+            Promise.all([
+                fetch('/profiles').then(function(r) { return r.json(); }),
+                fetch('/analyse/cache/count').then(function(r) { return r.json(); })
+            ]).then(function(results) {
+                var profiles = results[0].profiles || [];
+                var cacheCounts = results[1].by_account || {};
+
+                var profileAccountIds = {};
+                profiles.forEach(function(p) { profileAccountIds[cmpResolveAccountId(p)] = true; });
+
+                profileSelect.innerHTML = '<option value="">Select profile...</option>';
+                profiles.forEach(function(p) {
+                    var accountId = cmpResolveAccountId(p);
+                    var count = cacheCounts[accountId] || 0;
+                    if (count >= 2) { // Only show profiles with 2+ reports
+                        var opt = document.createElement('option');
+                        opt.value = p;
+                        opt.textContent = p + ' (' + count + ' reports)';
+                        profileSelect.appendChild(opt);
+                    }
+                });
+
+                // Manual/Named scans with cached reports
+                Object.keys(cacheCounts).forEach(function(acct) {
+                    if (!profileAccountIds[acct] && acct !== 'default' && cacheCounts[acct] >= 2) {
+                        var opt = document.createElement('option');
+                        opt.value = acct;
+                        opt.textContent = acct + ' (' + cacheCounts[acct] + ' reports)';
+                        profileSelect.appendChild(opt);
+                    }
+                });
+
+                if (profileSelect.options.length <= 1) {
+                    profileSelect.innerHTML = '<option value="">No profiles with multiple reports</option>';
+                }
+            });
+
+            profileSelect.addEventListener('change', function() {
+                reportASelect.disabled = true;
+                reportBSelect.disabled = true;
+                compareBtn.disabled = true;
+                if (!this.value) return;
+
+                fetch('/analyse/reports?profileName=' + encodeURIComponent(this.value))
+                    .then(function(r) { return r.json(); })
+                    .then(function(reports) {
+                        reportASelect.innerHTML = '';
+                        reportBSelect.innerHTML = '';
+
+                        reports.forEach(function(report, idx) {
+                            var ts = new Date(report.scanned_at).toLocaleString();
+                            var count = report.analysis_response ? report.analysis_response.total_resources : 0;
+                            var cost = report.analysis_response ? '$' + report.analysis_response.total_monthly_cost.toFixed(2) : '';
+                            var label = ts + ' (' + count + ' resources, ' + cost + ')';
+
+                            var optA = document.createElement('option');
+                            optA.value = idx;
+                            optA.textContent = label;
+                            reportASelect.appendChild(optA);
+
+                            var optB = document.createElement('option');
+                            optB.value = idx;
+                            optB.textContent = label;
+                            reportBSelect.appendChild(optB);
+                        });
+
+                        // Default: A = oldest (last index), B = newest (first index)
+                        if (reports.length >= 2) {
+                            reportASelect.value = reports.length - 1;
+                            reportBSelect.value = 0;
+                            reportASelect.disabled = false;
+                            reportBSelect.disabled = false;
+                            compareBtn.disabled = false;
+                        }
+                    });
+            });
+        });
+
+        function runCompare() {
+            var profile = document.getElementById('compareProfile').value;
+            var idxA = document.getElementById('compareReportA').value;
+            var idxB = document.getElementById('compareReportB').value;
+
+            if (!profile || idxA === '' || idxB === '') return;
+            if (idxA === idxB) { showToast('Select two different reports'); return; }
+
+            var btn = document.getElementById('compareBtn');
+            btn.disabled = true;
+            btn.textContent = 'Comparing...';
+
+            fetch('/analyse/compare?profileName=' + encodeURIComponent(profile) + '&reportA=' + idxA + '&reportB=' + idxB)
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.error) { showToast(data.error); return; }
+                    renderComparison(data);
+                })
+                .catch(function() { showToast('Comparison failed'); })
+                .finally(function() {
+                    btn.disabled = false;
+                    btn.textContent = 'Compare';
+                });
+        }
+
+        function renderComparison(data) {
+            document.getElementById('compareEmptyState').style.display = 'none';
+            document.getElementById('compareResults').style.display = '';
+
+            // Summary
+            setText('cmpAdded', '+' + data.summary.added_count);
+            setText('cmpRemoved', '-' + data.summary.removed_count);
+            setText('cmpChanged', data.summary.changed_count);
+
+            var costEl = document.getElementById('cmpCostChange');
+            var costChange = data.summary.cost_change;
+            costEl.textContent = (costChange >= 0 ? '+$' : '-$') + Math.abs(costChange).toFixed(2);
+            costEl.style.color = costChange > 0 ? 'var(--accent-danger)' : costChange < 0 ? 'var(--accent-success)' : 'var(--text-primary)';
+
+            // Finding-type deltas (computed from added/removed recommendation prefixes)
+            function isSec(rec) { return rec && (rec.includes('Rotate') || rec.includes('Enable') || rec.includes('Expired') || rec.includes('Exposed') || rec.includes('Misconfigured')); }
+            function isGov(rec) { return rec && (rec.includes('Stale') || rec.includes('Missing')); }
+            var secAdded = (data.added || []).filter(function(r) { return isSec(r.recommendation); }).length;
+            var secRemoved = (data.removed || []).filter(function(r) { return isSec(r.recommendation); }).length;
+            var govAdded = (data.added || []).filter(function(r) { return isGov(r.recommendation); }).length;
+            var govRemoved = (data.removed || []).filter(function(r) { return isGov(r.recommendation); }).length;
+            var costAdded = (data.added || []).filter(function(r) { return !isSec(r.recommendation) && !isGov(r.recommendation); }).length;
+            var costRemoved = (data.removed || []).filter(function(r) { return !isSec(r.recommendation) && !isGov(r.recommendation); }).length;
+            var secDelta = secAdded - secRemoved;
+            var govDelta = govAdded - govRemoved;
+            var costDelta = costAdded - costRemoved;
+            if (secDelta !== 0 || govDelta !== 0) {
+                document.getElementById('cmpFindingDeltas').style.display = '';
+                var secEl = document.getElementById('cmpSecDelta');
+                secEl.textContent = (secDelta >= 0 ? '+' : '') + secDelta;
+                secEl.style.color = secDelta > 0 ? 'var(--accent-danger)' : secDelta < 0 ? 'var(--accent-success)' : 'var(--text-primary)';
+                var govEl = document.getElementById('cmpGovDelta');
+                govEl.textContent = (govDelta >= 0 ? '+' : '') + govDelta;
+                govEl.style.color = govDelta > 0 ? 'var(--accent-danger)' : govDelta < 0 ? 'var(--accent-success)' : 'var(--text-primary)';
+                var cdEl = document.getElementById('cmpCostDelta');
+                cdEl.textContent = (costDelta >= 0 ? '+' : '') + costDelta;
+                cdEl.style.color = costDelta > 0 ? 'var(--accent-danger)' : costDelta < 0 ? 'var(--accent-success)' : 'var(--text-primary)';
+            }
+
+            // Category mismatch warning
+            var warningEl = document.getElementById('cmpCategoryWarning');
+            if (warningEl) {
+                if (data.category_warning) {
+                    var catA = data.report_a.scan_category || 'unknown';
+                    var catB = data.report_b.scan_category || 'unknown';
+                    var catLabel = function(c) { return c === 'COST_OPTIMIZATION' ? 'Cost & Idle' : c === 'SECURITY_GOVERNANCE' ? 'Security' : c === 'FULL' ? 'Full Scan' : c; };
+                    warningEl.innerHTML =
+                        '<div class="alert alert-warning border-0 shadow-sm mb-3 small">' +
+                        '<strong>Different scan categories:</strong> Report A was <span class="badge bg-primary">' + catLabel(catA) + '</span> and Report B was <span class="badge bg-primary">' + catLabel(catB) + '</span>. ' +
+                        'Only comparable resource types (' + (data.report_a.comparable_resources || '?') + ' vs ' + (data.report_b.comparable_resources || '?') + ') are shown below. ' +
+                        (data.not_comparable_a > 0 ? data.not_comparable_a + ' resources from Report A' : '') +
+                        (data.not_comparable_a > 0 && data.not_comparable_b > 0 ? ' and ' : '') +
+                        (data.not_comparable_b > 0 ? data.not_comparable_b + ' resources from Report B' : '') +
+                        ((data.not_comparable_a > 0 || data.not_comparable_b > 0) ? ' are not included in the comparison (different scan scope).' : '') +
+                        '</div>';
+                    warningEl.style.display = '';
+                } else {
+                    warningEl.style.display = 'none';
+                }
+            }
+
+            // Report info
+            var aInfo = new Date(data.report_a.scanned_at).toLocaleString() + ' | ' + data.report_a.total_resources + ' resources | $' + data.report_a.total_cost.toFixed(2);
+            var bInfo = new Date(data.report_b.scanned_at).toLocaleString() + ' | ' + data.report_b.total_resources + ' resources | $' + data.report_b.total_cost.toFixed(2);
+            setText('cmpReportAInfo', aInfo);
+            setText('cmpReportBInfo', bInfo);
+
+            // Added
+            var addedSection = document.getElementById('cmpAddedSection');
+            var addedBody = document.getElementById('cmpAddedBody');
+            if (data.added.length > 0) {
+                addedSection.style.display = '';
+                addedBody.innerHTML = '';
+                data.added.forEach(function(r) {
+                    addedBody.innerHTML += '<tr><td>' + esc(r.region) + '</td><td><span class="badge bg-secondary">' + esc(r.resource_type) + '</span></td><td>' + esc(r.resource_name) + '</td><td><code>' + esc(r.resource_id) + '</code></td><td>$' + (r.cost || 0).toFixed(2) + '</td><td>' + esc(r.recommendation) + '</td></tr>';
+                });
+            } else {
+                addedSection.style.display = 'none';
+            }
+
+            // Removed
+            var removedSection = document.getElementById('cmpRemovedSection');
+            var removedBody = document.getElementById('cmpRemovedBody');
+            if (data.removed.length > 0) {
+                removedSection.style.display = '';
+                removedBody.innerHTML = '';
+                data.removed.forEach(function(r) {
+                    removedBody.innerHTML += '<tr><td>' + esc(r.region) + '</td><td><span class="badge bg-secondary">' + esc(r.resource_type) + '</span></td><td>' + esc(r.resource_name) + '</td><td><code>' + esc(r.resource_id) + '</code></td><td>$' + (r.cost || 0).toFixed(2) + '</td><td>' + esc(r.recommendation) + '</td></tr>';
+                });
+            } else {
+                removedSection.style.display = 'none';
+            }
+
+            // Changed
+            var changedSection = document.getElementById('cmpChangedSection');
+            var changedBody = document.getElementById('cmpChangedBody');
+            if (data.changed.length > 0) {
+                changedSection.style.display = '';
+                changedBody.innerHTML = '';
+                data.changed.forEach(function(r) {
+                    var changes = [];
+                    if (r.cost_before !== undefined) changes.push('Cost: $' + r.cost_before.toFixed(2) + ' &rarr; $' + r.cost_after.toFixed(2));
+                    if (r.state_before) changes.push('State: ' + esc(r.state_before) + ' &rarr; ' + esc(r.state_after));
+                    if (r.rec_before) changes.push('Rec: ' + esc(r.rec_before) + ' &rarr; ' + esc(r.rec_after));
+                    changedBody.innerHTML += '<tr><td>' + esc(r.region) + '</td><td><span class="badge bg-secondary">' + esc(r.resource_type) + '</span></td><td>' + esc(r.resource_name) + '</td><td><code>' + esc(r.resource_id) + '</code></td><td class="small">' + changes.join('<br>') + '</td></tr>';
+                });
+            } else {
+                changedSection.style.display = 'none';
+            }
+
+            // No changes
+            var noChanges = document.getElementById('cmpNoChanges');
+            if (data.added.length === 0 && data.removed.length === 0 && data.changed.length === 0) {
+                noChanges.style.display = '';
+            } else {
+                noChanges.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+id: setup
+title: Setup
+sections:
+  - title: Quick Start
+    type: code
+    language: bash
+    content: |
+      git clone <repo-url>
+      cd cloud-resource-sentinel
+
+      # Native run
+      ./mvnw spring-boot:run
+
+      # Docker run
+      docker-compose up -d
+
+      # Open
+      http://localhost:8000/
+  - title: Prerequisites
+    type: columns
+    columns:
+      - heading: Required
+        items:
+          - "Java 21+"
+          - "AWS credentials (~/.aws/config or environment variables)"
+          - "IAM permissions (see iam-policy.json)"
+      - heading: Optional
+        items:
+          - "Docker + Docker Compose (v2.1+ for health check support)"
+          - "Ollama (for local AI models)"
+          - "AWS Bedrock access (for Claude AI)"
+      - heading: Docker Defaults
+        items:
+          - "Backend: 1G memory limit, 512M reservation"
+          - "Ollama: 4G memory limit, 1G reservation"
+          - "JVM: -Xms256m -Xmx512m -XX:+UseG1GC"
+          - "Health checks on both services"
+          - "Graceful shutdown: 30s timeout"
+  - title: Configuration
+    type: code
+    language: properties
+    content: |
+      server.port=8000
+      spring.threads.virtual.enabled=true
+      spring.jackson.property-naming-strategy=SNAKE_CASE
+
+      # Ollama (local AI)
+      spring.ai.ollama.base-url=${OLLAMA_HOST:http://localhost:11434}
+      spring.ai.ollama.chat.model=${ai.models.ollama.default:qwen2.5:3b}
+      spring.ai.ollama.chat.options.temperature=0.3
+      spring.ai.ollama.chat.options.top-p=0.9
+
+      # AWS Bedrock (cloud AI)
+      spring.ai.bedrock.aws.region=us-east-1
+      spring.ai.bedrock.converse.chat.options.model=${ai.models.bedrock.default:us.anthropic.claude-sonnet-4-6}
+      spring.ai.bedrock.converse.chat.options.temperature=0.3
+      spring.ai.bedrock.converse.chat.options.max-tokens=4096
+
+      # AI model registry — add/remove models here
+      ai.models.ollama.default=qwen2.5:3b
+      ai.models.ollama=qwen2.5:3b,llama3.2,mistral,deepseek-r1,gemma2,phi3
+      ai.models.bedrock.default=us.anthropic.claude-sonnet-4-6
+      ai.models.bedrock=us.anthropic.claude-sonnet-4-6,us.anthropic.claude-haiku-4-5-20251001
+
+      pricing.cache.ttl-hours=24
+      aws.default-region=us-east-1
+  - title: Ollama Model Setup (Docker)
+    type: code
+    language: bash
+    content: |
+      # Start Ollama container
+      docker-compose up -d ollama
+
+      # Pull models
+      docker exec sentinel-ollama ollama pull qwen2.5:3b
+      docker exec sentinel-ollama ollama pull llama3.2
+      docker exec sentinel-ollama ollama pull mistral
+
+      # Verify pulled models
+      docker exec sentinel-ollama ollama list
+
+      # Models persist in the ollama-data Docker volume

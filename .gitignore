@@ -1,0 +1,35 @@
+# Java / Maven
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.log
+*.iml
+.idea/
+*.swp
+*~
+!.mvn/wrapper/maven-wrapper.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+*.code-workspace
+
+# Docker
+docker-compose.override.yml
+
+# Claude Code local settings
+.claude/
+
+# AWS credentials (never commit)
+.aws/
+*.pem
+
+# Personal notes, articles, learnings, local settings (not part of the service)
+not_to_commit/
+notes/

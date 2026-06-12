@@ -1,0 +1,352 @@
+id: recommendations
+title: Recommendations
+intro: "Each resource type has specific recommendation logic based on metrics, state, and configuration."
+categories:
+  - {name: "Idle / Unused", color: "#ef4444", css: danger, description: "Resource has no activity. Candidate for termination or deletion. Contributes to potential savings."}
+  - {name: "Low Utilisation", color: "#f59e0b", css: warning, description: "Resource is active but underused. Consider downsizing to a smaller instance type."}
+  - {name: "Security / Governance", color: "#f56565", css: danger, description: "Security or governance finding: missing controls, expired credentials, misconfigured resources. Actionable with severity from INFO to CRITICAL."}
+  - {name: "Review", color: "#3b82f6", css: primary, description: "Requires human judgment but not automatically counted as actionable."}
+  - {name: "Active", color: "#10b981", css: success, description: "Resource is healthy and well-utilised. No action required."}
+groups:
+  - title: "Compute & Containers"
+    resources:
+      - {type: EC2, color: primary, rules: [
+          {recommendation: "Consider Terminating - Stopped", condition: "Instance state is stopped/stopping", source: "EC2 API state", css: danger},
+          {recommendation: "Idle - Consider Downsizing or Terminating", condition: "CPU < 5%", source: "CloudWatch CPUUtilization (7-day avg)", css: danger},
+          {recommendation: "Low Utilization - Consider Downsizing", condition: "CPU 5%-20%", source: "CloudWatch CPUUtilization", css: warning},
+          {recommendation: "Moderate Utilization", condition: "CPU 20%-50%", source: "CloudWatch CPUUtilization"},
+          {recommendation: "Active - Good Utilization", condition: "CPU >= 50%", source: "CloudWatch CPUUtilization", css: success}
+        ]}
+      - {type: Lambda, color: warning, rules: [
+          {recommendation: "Idle - No Invocations", condition: "0 invocations over 7 days", source: "CloudWatch Invocations", css: danger},
+          {recommendation: "High Error Rate - Review", condition: "Errors > 50% of invocations", source: "CloudWatch Errors + Invocations", css: danger},
+          {recommendation: "Active", condition: ">= 10 invocations/day", source: "CloudWatch Invocations", css: success}
+        ]}
+      - {type: EKS, color: success, rules: [
+          {recommendation: "Idle - No Node Groups", condition: "Cluster active but 0 node groups", source: "EKS API", css: danger},
+          {recommendation: "Active", condition: "ACTIVE status with node groups", source: "EKS API", css: success}
+        ]}
+      - {type: ECS, color: info, rules: [
+          {recommendation: "Idle - No Services or Tasks", condition: "0 services and 0 running tasks", source: "ECS API", css: danger},
+          {recommendation: "Idle - No Running Tasks", condition: "Has services but 0 running tasks", source: "ECS API", css: danger},
+          {recommendation: "Active", condition: "Running tasks > 0", source: "ECS API", css: success}
+        ]}
+  - title: Databases
+    resources:
+      - {type: "RDS / Aurora", color: success, rules: [
+          {recommendation: "Same CPU thresholds as EC2", condition: "5%, 20%, 50% CPU thresholds", source: "CloudWatch CPUUtilization"}
+        ]}
+      - {type: DynamoDB, color: secondary, rules: [
+          {recommendation: "Idle - No Read/Write Activity", condition: "RCU < 1 and WCU < 1", source: "CloudWatch consumed capacity", css: danger},
+          {recommendation: "Low Utilization - Consider Downsizing", condition: "RCU < 10 and WCU < 10", source: "CloudWatch consumed capacity", css: warning},
+          {recommendation: "Active", condition: "RCU >= 10 or WCU >= 10", source: "CloudWatch consumed capacity", css: success}
+        ]}
+      - {type: Redshift, color: success, rules: [
+          {recommendation: "Review - Cluster {status}", condition: "Status not available", source: "Redshift API", css: primary},
+          {recommendation: "Same CPU thresholds as EC2", condition: "When status is available", source: "CloudWatch CPUUtilization"}
+        ]}
+      - {type: ElastiCache, color: info, rules: [
+          {recommendation: "Same CPU thresholds as EC2", condition: "CPU-based classification", source: "CloudWatch CPUUtilization"}
+        ]}
+  - title: Storage
+    resources:
+      - {type: S3, color: warning, rules: [
+          {recommendation: "Empty - Consider Deleting", condition: "0 objects", source: "CloudWatch NumberOfObjects", css: danger},
+          {recommendation: "Inactive - No Recent Access", condition: "0 GetRequests + PutRequests in 30 days", source: "CloudWatch request metrics", css: danger},
+          {recommendation: "Active", condition: "Recent access detected", source: "CloudWatch request metrics", css: success}
+        ]}
+      - {type: EBS, color: warning, rules: [
+          {recommendation: "Delete - Unattached", condition: "Volume state is available", source: "EC2 API volume state", css: danger},
+          {recommendation: "In Use", condition: "Volume is attached", source: "EC2 API volume state", css: success}
+        ]}
+  - title: Networking
+    resources:
+      - {type: VPC, color: primary, rules: [
+          {recommendation: "Unused - No Running Instances", condition: "0 running EC2 instances", source: "EC2 API", css: danger},
+          {recommendation: "In Use", condition: "Running instances found", source: "EC2 API", css: success}
+        ]}
+      - {type: "Elastic IP", color: danger, rules: [
+          {recommendation: "Release - Unattached", condition: "Not associated with instance/ENI", source: "EC2 API", css: danger},
+          {recommendation: "In Use", condition: "Associated", source: "EC2 API", css: success}
+        ]}
+      - {type: "NAT Gateway", color: primary, rules: [
+          {recommendation: "Idle - Low Traffic", condition: "Bytes out < 1 KB over 7 days", source: "CloudWatch BytesOut", css: danger},
+          {recommendation: "Low Utilization", condition: "Bytes out 1 KB-1 MB", source: "CloudWatch BytesOut", css: warning},
+          {recommendation: "Active", condition: "Bytes out >= 1 MB", source: "CloudWatch BytesOut", css: success}
+        ]}
+      - {type: ELB, color: info, rules: [
+          {recommendation: "Review Usage", condition: "Always flagged for review", source: "N/A", css: primary}
+        ]}
+  - title: Messaging
+    resources:
+      - {type: SQS, color: info, rules: [
+          {recommendation: "Idle - No Messages Sent", condition: "0 messages sent/day over 7 days", source: "CloudWatch NumberOfMessagesSent", css: danger},
+          {recommendation: "Low Utilization", condition: "< 10 messages/day", source: "CloudWatch NumberOfMessagesSent", css: warning},
+          {recommendation: "Active", condition: ">= 10 messages/day", source: "CloudWatch NumberOfMessagesSent", css: success}
+        ]}
+      - {type: SNS, color: danger, rules: [
+          {recommendation: "Idle - No Subscriptions or Publishes", condition: "0 subscribers and 0 publishes/day", source: "SNS API + CloudWatch", css: danger},
+          {recommendation: "Low Utilization - No Recent Publishes", condition: "Has subscribers but 0 publishes", source: "CloudWatch NumberOfMessagesPublished", css: warning},
+          {recommendation: "Active", condition: "Publishes >= 1/day", source: "CloudWatch", css: success}
+        ]}
+  - title: "Security & Configuration"
+    resources:
+      - {type: "IAM User", color: danger, rules: [
+          {recommendation: "Unused - Inactive > 90 Days", condition: "No login/API usage in 90+ days", source: "IAM API", css: danger},
+          {recommendation: "Enable MFA - User Lacks Multi-Factor Authentication", condition: "Active without MFA", source: "IAM API listMFADevices", css: danger},
+          {recommendation: "Active", condition: "MFA enabled, used within 90 days", source: "IAM API", css: success}
+        ]}
+      - {type: "IAM Role", color: danger, rules: [
+          {recommendation: "Unused - Not Used > 90 Days", condition: "Role not assumed in 90+ days", source: "IAM API roleLastUsed", css: danger},
+          {recommendation: "Active", condition: "Used within 90 days", source: "IAM API", css: success}
+        ]}
+      - {type: KMS, color: warning, rules: [
+          {recommendation: "Stale - Key Pending Deletion", condition: "Key in PendingDeletion state", source: "KMS API describeKey", css: danger},
+          {recommendation: "Stale - Key {state}", condition: "Key not Enabled (Disabled, etc.)", source: "KMS API describeKey", css: danger},
+          {recommendation: "Rotate Key - Auto-Rotation Disabled", condition: "Enabled but no rotation", source: "KMS API getKeyRotationStatus", css: danger},
+          {recommendation: "Active", condition: "Enabled with rotation", source: "KMS API", css: success}
+        ]}
+      - {type: Secret, color: danger, rules: [
+          {recommendation: "Misconfigured - Non-Sensitive Value in Secrets Manager", condition: "Plain-text value stored in Secrets Manager", source: "Value type analysis", css: danger},
+          {recommendation: "Unused - Not Accessed > 90 Days", condition: "No access in 90+ days", source: "Secrets Manager API", css: danger},
+          {recommendation: "Rotate Secret - Auto-Rotation Disabled", condition: "Rotation not enabled", source: "Secrets Manager API", css: danger},
+          {recommendation: "Active", condition: "Recently accessed with rotation", source: "Secrets Manager API", css: success}
+        ]}
+      - {type: "SSM Parameter", color: success, rules: [
+          {recommendation: "Exposed - Sensitive Value Stored as Plain String", condition: "Plain String type with sensitive-looking name", source: "Name + type analysis", css: danger},
+          {recommendation: "Stale - Not Modified > 180 Days", condition: "Unchanged for 180+ days", source: "SSM API lastModifiedDate", css: danger},
+          {recommendation: "Active", condition: "Recently modified, appropriate type", source: "SSM API", css: success}
+        ]}
+  - title: "Management & Monitoring"
+    resources:
+      - {type: "CloudWatch Alarm", color: info, rules: [
+          {recommendation: "Stale - Alarm Has Insufficient Data", condition: "INSUFFICIENT_DATA state — may be monitoring a deleted resource", source: "CloudWatch describeAlarms", css: danger},
+          {recommendation: "Active", condition: "OK or ALARM state", source: "CloudWatch describeAlarms", css: success}
+        ]}
+      - {type: "CloudWatch Log Group", color: success, rules: [
+          {recommendation: "Missing Retention Policy - Logs Never Expire", condition: "Retention is null — logs grow indefinitely", source: "CloudWatch Logs describeLogGroups", css: danger},
+          {recommendation: "Active", condition: "Retention policy configured", source: "CloudWatch Logs", css: success}
+        ]}
+      - {type: CloudTrail, color: primary, rules: [
+          {recommendation: "Enable Logging - CloudTrail Not Recording", condition: "Trail exists but isLogging is false", source: "CloudTrail getTrailStatus", css: danger},
+          {recommendation: "Active", condition: "Logging enabled", source: "CloudTrail getTrailStatus", css: success}
+        ]}
+  - title: "Snapshots & Container Registry"
+    resources:
+      - {type: "EBS Snapshot", color: warning, rules: [
+          {recommendation: "Review - Orphaned Snapshot", condition: "Source volume no longer exists", source: "EC2 API describeSnapshots + describeVolumes", css: danger},
+          {recommendation: "Review - Old Snapshot (>90 days)", condition: "Created more than 90 days ago", source: "EC2 API startTime", css: primary},
+          {recommendation: "Active", condition: "Recent snapshot with existing volume", source: "EC2 API", css: success}
+        ]}
+      - {type: "RDS Snapshot", color: success, rules: [
+          {recommendation: "Review - Old Snapshot (>90 days)", condition: "Manual snapshot created >90 days ago", source: "RDS API snapshotCreateTime", css: primary},
+          {recommendation: "Active", condition: "Recent manual snapshot", source: "RDS API", css: success}
+        ]}
+      - {type: ECR, color: primary, rules: [
+          {recommendation: "Empty - Consider Deleting", condition: "Repository has 0 images", source: "ECR API describeImages", css: danger},
+          {recommendation: "Review - Stale Images", condition: "All images pushed >90 days ago", source: "ECR API imagePushedAt", css: primary},
+          {recommendation: "Active", condition: "Recently pushed images", source: "ECR API", css: success}
+        ]}
+  - title: "File Storage"
+    resources:
+      - {type: EFS, color: info, rules: [
+          {recommendation: "Empty - Consider Deleting", condition: "File system < 1 MB", source: "EFS API sizeInBytes", css: danger},
+          {recommendation: "Unused - No Mount Targets", condition: "No mount targets configured", source: "EFS API describeMountTargets", css: danger},
+          {recommendation: "Active", condition: "Has mount targets and data", source: "EFS API", css: success}
+        ]}
+      - {type: FSx, color: primary, rules: [
+          {recommendation: "Review - {lifecycle}", condition: "Lifecycle not AVAILABLE", source: "FSx API describeFileSystems", css: primary},
+          {recommendation: "Active", condition: "AVAILABLE lifecycle with storage", source: "FSx API", css: success}
+        ]}
+  - title: "Data & Analytics"
+    resources:
+      - {type: OpenSearch, color: warning, rules: [
+          {recommendation: "Idle - Consider Downsizing or Terminating", condition: "CPU < 5% (7-day avg)", source: "CloudWatch CPUUtilization (AWS/ES)", css: danger},
+          {recommendation: "Low Utilization - Consider Downsizing", condition: "CPU 5%-20%", source: "CloudWatch CPUUtilization", css: warning},
+          {recommendation: "Active", condition: "CPU >= 20%", source: "CloudWatch CPUUtilization", css: success}
+        ]}
+      - {type: Kinesis, color: info, rules: [
+          {recommendation: "Idle - No Incoming Records", condition: "0 IncomingRecords over 7 days", source: "CloudWatch IncomingRecords (AWS/Kinesis)", css: danger},
+          {recommendation: "Active", condition: "Records flowing", source: "CloudWatch", css: success}
+        ]}
+      - {type: Glue, color: warning, rules: [
+          {recommendation: "Idle - No Recent Runs", condition: "Job/crawler not run in 90+ days", source: "Glue API getJobRuns / getCrawler", css: danger},
+          {recommendation: "Active", condition: "Recent runs", source: "Glue API", css: success}
+        ]}
+  - title: "API & Serverless"
+    resources:
+      - {type: "API Gateway", color: primary, rules: [
+          {recommendation: "Idle - No Requests", condition: "0 requests over 7 days", source: "CloudWatch Count (AWS/ApiGateway)", css: danger},
+          {recommendation: "Low Utilization", condition: "< 100 requests/day", source: "CloudWatch Count", css: warning},
+          {recommendation: "Active", condition: ">= 100 requests/day", source: "CloudWatch", css: success}
+        ]}
+      - {type: "Step Functions", color: success, rules: [
+          {recommendation: "Idle - No Executions", condition: "0 executions over 7 days", source: "CloudWatch ExecutionsStarted (AWS/States)", css: danger},
+          {recommendation: "Low Utilization", condition: "< 10 executions/day", source: "CloudWatch", css: warning},
+          {recommendation: "Active", condition: ">= 10 executions/day", source: "CloudWatch", css: success}
+        ]}
+  - title: "ML & Application Services"
+    resources:
+      - {type: SageMaker, color: danger, rules: [
+          {recommendation: "Review - Endpoint not InService", condition: "Endpoint status != InService", source: "SageMaker API listEndpoints", css: primary},
+          {recommendation: "Stopped - Consider Deleting", condition: "Notebook instance is Stopped", source: "SageMaker API listNotebookInstances", css: danger},
+          {recommendation: "Review - Running Notebook", condition: "Notebook InService (billed while running)", source: "SageMaker API", css: primary},
+          {recommendation: "Active", condition: "Endpoint InService", source: "SageMaker API", css: success}
+        ]}
+      - {type: "Transfer Family", color: danger, rules: [
+          {recommendation: "Review - Server Offline", condition: "Server state is OFFLINE", source: "Transfer API describeServer", css: primary},
+          {recommendation: "Active", condition: "Server ONLINE ($0.30/hr)", source: "Transfer API", css: success}
+        ]}
+      - {type: "Elastic Beanstalk", color: success, rules: [
+          {recommendation: "Review - Unhealthy", condition: "Environment health is Red", source: "EB API describeEnvironments", css: danger},
+          {recommendation: "Active", condition: "Ready with Green health", source: "EB API", css: success}
+        ]}
+  - title: "CDN & DNS"
+    resources:
+      - {type: CloudFront, color: danger, rules: [
+          {recommendation: "Review - Distribution Disabled", condition: "Distribution is disabled", source: "CloudFront API listDistributions", css: primary},
+          {recommendation: "Active", condition: "Distribution enabled", source: "CloudFront API", css: success}
+        ]}
+      - {type: "Route 53", color: info, rules: [
+          {recommendation: "Empty - Consider Deleting", condition: "Zone has only SOA + NS records (<= 2)", source: "Route 53 API getHostedZone", css: danger},
+          {recommendation: "Active", condition: "Zone has DNS records", source: "Route 53 API", css: success}
+        ]}
+  - title: "1. Attachment Correlations"
+    subtitle: "Resources attached to stopped or idle parents"
+    resources:
+      - {type: "EBS → Stopped EC2", color: warning, rules: [
+          {recommendation: "Review - Attached to Stopped Instance", condition: "EBS volume attached to a stopped EC2 instance", source: "Correlation: EBS + EC2 state", css: primary}
+        ]}
+      - {type: "EIP → Stopped EC2", color: danger, rules: [
+          {recommendation: "Release - Instance is Stopped", condition: "Elastic IP associated with stopped EC2 ($3.65/mo waste)", source: "Correlation: EIP + EC2 state", css: danger}
+        ]}
+  - title: "2. Orphaned Resource Correlations"
+    subtitle: "Resources whose parent has been deleted"
+    resources:
+      - {type: "RDS Snapshot → Deleted DB", color: danger, rules: [
+          {recommendation: "Review - Source DB Deleted", condition: "Manual snapshot for a database that no longer exists", source: "Correlation: RDS Snapshot + RDS/Aurora", css: danger}
+        ]}
+      - {type: "EBS Snapshot → No EC2", color: warning, rules: [
+          {recommendation: "Orphaned (enhanced)", condition: "Orphaned snapshot in region with no EC2 instances — volume and instance both deleted", source: "Correlation: EBS Snapshot + EC2 presence", css: danger}
+        ]}
+      - {type: "CW Log → Idle Lambda", color: success, rules: [
+          {recommendation: "Review - Idle Lambda + No Retention", condition: "Log group for idle Lambda function with no retention policy", source: "Correlation: Lambda + CW Log Group", css: primary}
+        ]}
+      - {type: "CW Log → Deleted Lambda", color: danger, rules: [
+          {recommendation: "Orphaned log group", condition: "Lambda function no longer exists — log group will never receive new entries", source: "Correlation: Lambda name lookup", css: danger}
+        ]}
+      - {type: "Secrets/SSM → Unused", color: warning, rules: [
+          {recommendation: "Unused (enhanced)", condition: "Secret or parameter not accessed recently — consuming application may be decommissioned", source: "Correlation: access pattern + cost ($0.40/mo per secret)", css: primary}
+        ]}
+  - title: "3. Isolated Resource Correlations"
+    subtitle: "Resources in regions with no running compute (EC2/ECS/EKS/Lambda/Beanstalk)"
+    resources:
+      - {type: "NAT Gateway → No Compute", color: primary, rules: [
+          {recommendation: "Review - No Running Compute", condition: "NAT Gateway in region with no running compute (~$32/mo wasted)", source: "Correlation: NAT + compute presence", css: danger}
+        ]}
+      - {type: "RDS/Aurora/ElastiCache/OpenSearch/Redshift/EFS/FSx → No Compute", color: warning, rules: [
+          {recommendation: "Isolated database/cache/storage", condition: "Running in region with no compute at $X/mo — possibly forgotten dev/test resource", source: "Correlation: service + compute presence", css: primary}
+        ]}
+      - {type: "SQS → No Compute", color: info, rules: [
+          {recommendation: "Idle queue (enhanced)", condition: "Idle queue in region with no running compute — likely no active consumers", source: "Correlation: SQS + compute presence", css: primary}
+        ]}
+      - {type: "DocumentDB/Neptune → No Compute", color: warning, rules: [
+          {recommendation: "Isolated cluster", condition: "Document/graph database in region with no compute workloads", source: "Correlation: DB + compute presence", css: primary}
+        ]}
+      - {type: "MemoryDB → No Compute", color: warning, rules: [
+          {recommendation: "Isolated in-memory DB", condition: "MemoryDB cluster in region with no compute — requires application connections", source: "Correlation: MemoryDB + compute presence", css: primary}
+        ]}
+      - {type: "Glue → No Compute", color: info, rules: [
+          {recommendation: "Idle ETL (enhanced)", condition: "Idle Glue job/crawler in region with no compute — possibly decommissioned data pipeline", source: "Correlation: Glue + compute presence", css: primary}
+        ]}
+  - title: "4. Load Balancer Correlations"
+    resources:
+      - {type: "ALB/NLB/ELB → No Targets", color: info, rules: [
+          {recommendation: "Review - No Healthy Targets", condition: "Load balancer with 0 healthy targets (~$16-22/mo waste)", source: "Correlation: ELB target analysis", css: danger}
+        ]}
+  - title: "5. Security & Governance Correlations"
+    subtitle: "Cross-references for security posture and configuration hygiene"
+    resources:
+      - {type: "ACM → Not In Use", color: danger, rules: [
+          {recommendation: "Unused certificate (enhanced)", condition: "Certificate not associated with any ALB, CloudFront, or API Gateway", source: "Correlation: ACM + load balancer/CDN/API presence", css: primary}
+        ]}
+      - {type: "ACM → Expired", color: danger, rules: [
+          {recommendation: "Expired certificate (enhanced)", condition: "Expired cert may be causing errors on referencing ALBs/CloudFront", source: "Correlation: ACM expiry + resource references", css: danger}
+        ]}
+      - {type: "WAF → Not Associated", color: warning, rules: [
+          {recommendation: "Unused WAF (enhanced)", condition: "Web ACL not protecting any resource (~$5/mo + $1/rule wasted)", source: "Correlation: WAF + resource association", css: primary}
+        ]}
+      - {type: "CloudWatch Alarm → Deleted Resource", color: info, rules: [
+          {recommendation: "Orphaned alarm", condition: "Alarm may reference a resource that no longer exists — causes false notifications", source: "Correlation: Alarm target + resource ID lookup", css: primary}
+        ]}
+      - {type: "IAM User → No MFA", color: danger, rules: [
+          {recommendation: "Enable MFA (enhanced)", condition: "IAM user without MFA — critical security finding with remediation guidance", source: "Correlation: IAM MFA status", css: danger}
+        ]}
+      - {type: "KMS → Pending Deletion", color: danger, rules: [
+          {recommendation: "Key pending deletion (enhanced)", condition: "Encrypted data (S3/EBS/RDS) will become permanently inaccessible", source: "Correlation: KMS state + dependent resources", css: danger}
+        ]}
+      - {type: "CloudTrail → Not Logging", color: danger, rules: [
+          {recommendation: "Enable Logging (enhanced)", condition: "No audit trail for API activity — significant security gap", source: "Correlation: CloudTrail logging status", css: danger}
+        ]}
+      - {type: "Shield → Deleted Resource", color: warning, rules: [
+          {recommendation: "Orphaned protection", condition: "Shield protection on a resource that may no longer exist — wastes a protection slot", source: "Correlation: Shield protection ARN + resource lookup", css: primary}
+        ]}
+  - title: "6. Infrastructure Correlations"
+    subtitle: "CloudFormation, DMS, and operational state"
+    resources:
+      - {type: "CloudFormation → Rollback", color: warning, rules: [
+          {recommendation: "Rollback state (enhanced)", condition: "Failed deployment left behind partial resources incurring charges", source: "Correlation: stack status + events", css: primary}
+        ]}
+      - {type: "CloudFormation → Delete Failed", color: danger, rules: [
+          {recommendation: "Delete failed (enhanced)", condition: "Stack can't delete due to dependencies (non-empty S3, in-use security group)", source: "Correlation: stack deletion events", css: danger}
+        ]}
+      - {type: "DMS → No Tasks", color: warning, rules: [
+          {recommendation: "No replication tasks (enhanced)", condition: "Replication instance running with no active migration tasks — cost with no work", source: "Correlation: DMS instance + task count", css: primary}
+        ]}
+      - {type: "Athena → Disabled", color: info, rules: [
+          {recommendation: "Disabled workgroup", condition: "No queries can execute — configuration clutter", source: "Correlation: Athena workgroup state", css: primary}
+        ]}
+  - title: "7. Cross-Service Dependency Chains"
+    subtitle: "Multi-resource relationships and abandoned projects"
+    resources:
+      - {type: "SageMaker Notebook → No Endpoints", color: warning, rules: [
+          {recommendation: "Abandoned ML project", condition: "Stopped notebook with no active endpoints — still incurs EBS storage charges", source: "Correlation: SageMaker notebook + endpoint presence", css: primary}
+        ]}
+      - {type: "ECR → No Container Workloads", color: info, rules: [
+          {recommendation: "Unused repository (enhanced)", condition: "No ECS/EKS workloads in same region — repository may be unused", source: "Correlation: ECR + ECS/EKS presence", css: primary}
+        ]}
+      - {type: "Route53 → Stale Records", color: warning, rules: [
+          {recommendation: "Stale DNS (enhanced)", condition: "Zone may contain records pointing to deleted load balancers, EC2, or CloudFront", source: "Correlation: Route53 + resource existence", css: primary}
+        ]}
+      - {type: "Transfer Family → No Users", color: danger, rules: [
+          {recommendation: "Idle server (enhanced)", condition: "SFTP server with no transfers (~$216/mo waste)", source: "Correlation: Transfer server activity", css: danger}
+        ]}
+      - {type: "API Gateway → No Traffic", color: info, rules: [
+          {recommendation: "Idle API (enhanced)", condition: "API with no recent requests — may belong to a retired microservice", source: "Correlation: API Gateway + Lambda/ECS references", css: primary}
+        ]}
+      - {type: "SNS → No Subscribers", color: info, rules: [
+          {recommendation: "Orphaned topic (enhanced)", condition: "Topic with no subscribers or publishes — decommissioned notification pipeline", source: "Correlation: SNS + subscriber count", css: primary}
+        ]}
+      - {type: "Kinesis → No Activity", color: danger, rules: [
+          {recommendation: "Idle stream (enhanced)", condition: "No records flowing (~$25/mo per shard waste)", source: "Correlation: Kinesis activity + region", css: danger}
+        ]}
+      - {type: "Step Functions → No Executions", color: info, rules: [
+          {recommendation: "Idle state machine (enhanced)", condition: "No recent executions — may reference idle Lambda functions", source: "Correlation: Step Functions + execution history", css: primary}
+        ]}
+      - {type: "CodePipeline → No Executions", color: warning, rules: [
+          {recommendation: "Idle pipeline (enhanced)", condition: "No executions in 90+ days ($1/mo) — project may be decommissioned", source: "Correlation: pipeline + source/deploy targets", css: primary}
+        ]}
+      - {type: "Managed Grafana → Verify Usage", color: info, rules: [
+          {recommendation: "Verify workspace usage", condition: "Grafana workspace costs $9/mo per editor — confirm active dashboards exist", source: "Correlation: Grafana workspace state", css: primary}
+        ]}
+      - {type: "Lightsail → Stopped", color: warning, rules: [
+          {recommendation: "Stopped instance (enhanced)", condition: "Stopped Lightsail still incurs fixed monthly charges — snapshot and delete", source: "Correlation: Lightsail state + pricing model", css: primary}
+        ]}
+      - {type: "Lightsail DB → Stopped", color: warning, rules: [
+          {recommendation: "Stopped database (enhanced)", condition: "Stopped Lightsail DB incurs storage charges — export and delete", source: "Correlation: Lightsail DB state", css: primary}
+        ]}
+metrics_note:
+  title: "How Recommendations Affect Dashboard Metrics"
+  text: "Resources with the following recommendation prefixes count as Actionable Findings. For COST findings, their monthly cost is included in Potential Savings:"
+  keywords: [Idle, Terminating, Delete, Release, Unused, Empty, Inactive, Stopped, Rotate, Enable, Restrict, Expired, Exposed, Missing, Stale, Misconfigured]
+  footer: "Resources with Review, Low Utilization, or Moderate Utilization are flagged but do not count toward actionable/savings totals. Active resources require no action. Potential Savings only includes COST findings — security/governance findings are counted as actionable but don't contribute to the dollar savings figure."

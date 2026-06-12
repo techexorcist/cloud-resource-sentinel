@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{pages/layout/fragments/head :: head('Summary')}">
+    <title>Scan Summary — Cloud Resource Sentinel</title>
+</head>
+<body>
+    <div th:replace="~{pages/layout/fragments/header :: header}"></div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <nav th:replace="~{pages/layout/fragments/sidebar :: sidebar}"></nav>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2 fw-bold" style="color: var(--text-primary);">Scan Summary</h1>
+                    <select class="form-select form-select-sm" id="summaryProfile" style="width: auto; min-width: 250px;">
+                        <option value="">Select profile...</option>
+                    </select>
+                </div>
+
+                <!-- Empty State -->
+                <div id="summaryEmptyState" class="text-center py-5">
+                    <div style="font-size: 2.5rem;" class="mb-3">&#x1f4cb;</div>
+                    <h5 style="color: var(--text-primary);">No cached reports available</h5>
+                    <p class="text-muted mb-3">Run a scan from the Analyse page to generate a report. The scan summary and health report will appear here.</p>
+                    <div class="d-flex gap-2 justify-content-center">
+                        <a href="/dashboard/analyse" class="btn btn-primary">Go to Analyse</a>
+                    </div>
+                </div>
+
+                <!-- Summary Content -->
+                <div id="summaryContent" style="display:none;">
+
+                    <!-- Scan Health -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-12">
+                            <div class="card border-0 shadow-sm" id="scanHealthCard">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <span id="healthIcon" style="font-size:1.8rem; margin-right:0.75rem;"></span>
+                                        <div>
+                                            <h5 class="fw-bold mb-0" id="healthTitle" style="color: var(--text-primary);"></h5>
+                                            <small class="text-muted" id="healthSubtitle"></small>
+                                        </div>
+                                    </div>
+                                    <div class="row text-center" id="healthMetrics">
+                                        <div class="col-md-3">
+                                            <small class="text-uppercase fw-semibold" style="color: var(--text-muted); font-size: 0.6rem;">Total Tasks</small>
+                                            <h4 class="fw-bold mb-0" id="summaryTotalTasks" style="color: var(--text-primary);">0</h4>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <small class="text-uppercase fw-semibold text-success" style="font-size: 0.6rem;">Succeeded</small>
+                                            <h4 class="fw-bold mb-0 text-success" id="summarySuccessCount">0</h4>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <small class="text-uppercase fw-semibold text-danger" style="font-size: 0.6rem;">Failed</small>
+                                            <h4 class="fw-bold mb-0 text-danger" id="summaryFailureCount">0</h4>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <small class="text-uppercase fw-semibold" style="color: var(--text-muted); font-size: 0.6rem;">Regions Scanned</small>
+                                            <h4 class="fw-bold mb-0" id="summaryRegions" style="color: var(--text-primary);">0</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Scanner Errors -->
+                    <div id="scannerErrorsSection" style="display:none;" class="mb-4">
+                        <div class="card border-0 shadow-sm border-start border-danger border-3">
+                            <div class="card-header bg-transparent border-0 pb-0">
+                                <h6 class="fw-bold mb-0" style="color: var(--text-primary);">
+                                    <span style="color: #dc3545;">&#9888;</span> Failed Scanner Tasks
+                                </h6>
+                            </div>
+                            <div class="card-body pt-2">
+                                <div class="table-responsive">
+                                    <table class="table table-sm mb-0" style="color: var(--text-primary);">
+                                        <thead>
+                                            <tr>
+                                                <th style="font-size:0.75rem;" class="text-uppercase">Type</th>
+                                                <th style="font-size:0.75rem;" class="text-uppercase">Scanner</th>
+                                                <th style="font-size:0.75rem;" class="text-uppercase">Region</th>
+                                                <th style="font-size:0.75rem;" class="text-uppercase">Reason</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="scannerErrorsBody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Overview Metrics -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-2">
+                            <div class="card border-0 shadow-sm"><div class="card-body py-3 text-center">
+                                <small class="text-uppercase fw-semibold" style="color: var(--text-muted); font-size: 0.6rem;">Total Resources</small>
+                                <h3 class="fw-bold mb-0" id="summaryTotalResources" style="color: var(--text-primary);">0</h3>
+                            </div></div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="card border-0 shadow-sm"><div class="card-body py-3 text-center">
+                                <small class="text-uppercase fw-semibold" style="color: var(--text-muted); font-size: 0.6rem;">Monthly Cost</small>
+                                <h3 class="fw-bold mb-0 text-info" id="summaryMonthlyCost">$0</h3>
+                            </div></div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="card border-0 shadow-sm"><div class="card-body py-3 text-center">
+                                <small class="text-uppercase fw-semibold" style="color: var(--text-muted); font-size: 0.6rem;">Idle Resources</small>
+                                <h3 class="fw-bold mb-0 text-warning" id="summaryIdleCount">0</h3>
+                            </div></div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="card border-0 shadow-sm"><div class="card-body py-3 text-center">
+                                <small class="text-uppercase fw-semibold" style="color: var(--text-muted); font-size: 0.6rem;">Potential Savings</small>
+                                <h3 class="fw-bold mb-0 text-success" id="summaryPotentialSavings">$0</h3>
+                            </div></div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="card border-0 shadow-sm"><div class="card-body py-3 text-center">
+                                <small class="text-uppercase fw-semibold" style="color: var(--text-muted); font-size: 0.6rem;">AI Provider</small>
+                                <h3 class="fw-bold mb-0" id="summaryAiProvider" style="color: var(--text-primary); font-size: 1rem;">—</h3>
+                            </div></div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="card border-0 shadow-sm"><div class="card-body py-3 text-center">
+                                <small class="text-uppercase fw-semibold" style="color: var(--text-muted); font-size: 0.6rem;">Scan Time</small>
+                                <h3 class="fw-bold mb-0" id="summaryScanTime" style="color: var(--text-primary); font-size: 1rem;">—</h3>
+                            </div></div>
+                        </div>
+                    </div>
+
+                    <!-- Scan Summary -->
+                    <div id="scanSummarySection" style="display:none;" class="mb-4">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header border-0" style="background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%); color: white;">
+                                <strong>Scan Summary</strong>
+                            </div>
+                            <div class="card-body">
+                                <p class="mb-3" id="scanSummaryText" style="color: var(--text-primary);"></p>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <div class="card h-100 border-0" style="background: var(--bg-secondary);">
+                                            <div class="card-body py-2">
+                                                <h6 class="fw-semibold small text-uppercase mb-1" style="color: var(--text-muted);">Top Cost Areas</h6>
+                                                <div id="topCostAreas" class="small" style="color: var(--text-primary);"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="card h-100 border-0" style="background: var(--bg-secondary);">
+                                            <div class="card-body py-2">
+                                                <h6 class="fw-semibold small text-uppercase mb-1" style="color: var(--text-muted);">Highest Savings Opportunities</h6>
+                                                <div id="topSavings" class="small" style="color: var(--text-primary);"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="card h-100 border-0" style="background: var(--bg-secondary);">
+                                            <div class="card-body py-2">
+                                                <h6 class="fw-semibold small text-uppercase mb-1" style="color: var(--text-muted);">Attention Required</h6>
+                                                <div id="attentionRequired" class="small" style="color: var(--text-primary);"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Regional Distribution -->
+                    <div id="regionDistSection" style="display:none;" class="mb-4">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
+                                <strong style="color: var(--text-primary);">Regional Distribution</strong>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="toggleEmptyRegions()">Show empty regions</button>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <h6 class="small fw-semibold text-uppercase mb-2" style="color: var(--text-muted);">Active Regions</h6>
+                                        <div id="activeRegionsList" class="small"></div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <h6 class="small fw-semibold text-uppercase mb-2" style="color: var(--accent-warning);">Sparse Regions</h6>
+                                        <div id="sparseRegionsList" class="small"></div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div id="emptyRegionsContainer" style="display:none;">
+                                            <h6 class="small fw-semibold text-uppercase mb-2" style="color: var(--text-muted);">Empty Regions</h6>
+                                            <div id="emptyRegionsList" class="small" style="color: var(--text-muted);"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cost & Risk Analysis (side by side) -->
+                    <div id="costRiskSection" style="display:none;" class="mb-4">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="card border-0 shadow-sm h-100">
+                                    <div class="card-header bg-transparent border-0 pb-0">
+                                        <h6 class="fw-bold mb-0" style="color: var(--text-primary);">Cost Analysis</h6>
+                                    </div>
+                                    <div class="card-body pt-2">
+                                        <div id="summaryAiCostNarrative" style="color: var(--text-primary);" class="mb-0 small"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card border-0 shadow-sm h-100">
+                                    <div class="card-header bg-transparent border-0 pb-0">
+                                        <h6 class="fw-bold mb-0" style="color: var(--text-primary);">Risk Overview</h6>
+                                    </div>
+                                    <div class="card-body pt-2">
+                                        <div id="summaryRiskOverview" style="color: var(--text-primary);" class="mb-0 small"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Architecture Insights -->
+                    <div id="archInsightsSection" style="display:none;" class="mb-4">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-transparent border-0 pb-0">
+                                <h6 class="fw-bold mb-0" style="color: var(--text-primary);">Architecture Insights</h6>
+                            </div>
+                            <div class="card-body pt-2">
+                                <div id="archInsightsList"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right-Sizing Recommendations -->
+                    <div id="rightSizingSection" style="display:none;" class="mb-4">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-transparent border-0 pb-0">
+                                <h6 class="fw-bold mb-0" style="color: var(--text-primary);">Right-Sizing Recommendations</h6>
+                            </div>
+                            <div class="card-body pt-2">
+                                <div class="table-responsive">
+                                    <table class="table table-sm mb-0" style="color: var(--text-primary);">
+                                        <thead>
+                                            <tr>
+                                                <th style="font-size:0.75rem;" class="text-uppercase">Resource</th>
+                                                <th style="font-size:0.75rem;" class="text-uppercase">Current</th>
+                                                <th style="font-size:0.75rem;" class="text-uppercase">Recommended</th>
+                                                <th style="font-size:0.75rem;" class="text-uppercase">Savings</th>
+                                                <th style="font-size:0.75rem;" class="text-uppercase">Reasoning</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="rightSizingBody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Prioritized Actions (Top 5) -->
+                    <div id="actionsSection" style="display:none;" class="mb-4">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-transparent border-0 pb-0">
+                                <h6 class="fw-bold mb-0" style="color: var(--text-primary);">Top Prioritized Actions</h6>
+                            </div>
+                            <div class="card-body pt-2">
+                                <div class="table-responsive">
+                                    <table class="table table-sm mb-0" style="color: var(--text-primary);">
+                                        <thead>
+                                            <tr>
+                                                <th style="font-size:0.75rem;" class="text-uppercase">Action</th>
+                                                <th style="font-size:0.75rem;" class="text-uppercase">Resource</th>
+                                                <th style="font-size:0.75rem;" class="text-uppercase">Type</th>
+                                                <th style="font-size:0.75rem;" class="text-uppercase">Region</th>
+                                                <th style="font-size:0.75rem;" class="text-uppercase">Risk</th>
+                                                <th style="font-size:0.75rem;" class="text-uppercase">Savings</th>
+                                                <th style="font-size:0.75rem;" class="text-uppercase">Reasoning</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="actionsBody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cleanup Plan -->
+                    <div id="cleanupPlanSection" style="display:none;" class="mb-4">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-transparent border-0 pb-0">
+                                <h6 class="fw-bold mb-0" style="color: var(--text-primary);">Cleanup Plan</h6>
+                            </div>
+                            <div class="card-body pt-2">
+                                <div id="cleanupPlanList"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- What's Working Well -->
+                    <div id="wellArchitectedSection" style="display:none;" class="mb-4">
+                        <div class="card border-0 shadow-sm" style="border-left: 5px solid #198754 !important;">
+                            <div class="card-header bg-transparent border-0 pb-0">
+                                <h6 class="fw-bold mb-0" style="color: #198754;">What's Working Well</h6>
+                            </div>
+                            <div class="card-body pt-2">
+                                <div id="wellArchitectedList"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script th:src="@{/js/sentinel.js(v=1747030000)}"></script>
+    <script>
+    (function() {
+        var profileSelect = document.getElementById('summaryProfile');
+        var emptyState = document.getElementById('summaryEmptyState');
+        var content = document.getElementById('summaryContent');
+
+        // Load profiles and auto-select
+        // Only show profiles with cached reports
+        function resolveAccountId(profileName) {
+            var parts = profileName.split('-');
+            if (parts.length >= 2) {
+                var last = parts[parts.length - 1];
+                if (/^\d{12}$/.test(last)) return last;
+            }
+            return profileName;
+        }
+
+        Promise.all([
+            fetch('/profiles').then(function(r) { return r.json(); }),
+            fetch('/analyse/cache/count').then(function(r) { return r.json(); }).catch(function() { return { by_account: {} }; })
+        ]).then(function(results) {
+            var profiles = results[0].profiles || [];
+            var cacheCounts = results[1].by_account || {};
+
+            profileSelect.innerHTML = '<option value="">Select profile...</option>';
+
+            var profileAccountIds = {};
+            profiles.forEach(function(p) { profileAccountIds[resolveAccountId(p)] = true; });
+
+            var hasAny = false;
+            profiles.forEach(function(p) {
+                var accountId = resolveAccountId(p);
+                var count = cacheCounts[accountId] || 0;
+                if (count > 0) {
+                    var opt = document.createElement('option');
+                    opt.value = p;
+                    opt.textContent = p + ' (' + count + ' report' + (count > 1 ? 's' : '') + ')';
+                    profileSelect.appendChild(opt);
+                    hasAny = true;
+                }
+            });
+
+            // Manual/Named scans with cached reports
+            Object.keys(cacheCounts).forEach(function(acct) {
+                if (!profileAccountIds[acct] && acct !== 'default') {
+                    var opt = document.createElement('option');
+                    opt.value = acct;
+                    opt.textContent = acct + ' (' + cacheCounts[acct] + ' report' + (cacheCounts[acct] > 1 ? 's' : '') + ')';
+                    profileSelect.appendChild(opt);
+                    hasAny = true;
+                }
+            });
+
+            if (!hasAny) return;
+
+            // Auto-select from sessionStorage or first available
+            var raw = sessionStorage.getItem('sentinel-report');
+            var autoProfile = null;
+            if (raw) {
+                try {
+                    var parsed = JSON.parse(raw);
+                    if (parsed.profile_name) autoProfile = parsed.profile_name;
+                } catch(e) {}
+            }
+
+            if (autoProfile) {
+                var opts = Array.from(profileSelect.options).map(function(o) { return o.value; });
+                if (opts.indexOf(autoProfile) >= 0) {
+                    profileSelect.value = autoProfile;
+                    loadSummaryFromApi(autoProfile);
+                }
+            } else if (profileSelect.options.length > 1) {
+                profileSelect.selectedIndex = 1;
+                loadSummaryFromApi(profileSelect.value);
+            }
+        });
+
+        profileSelect.addEventListener('change', function() {
+            if (this.value) loadSummaryFromApi(this.value);
+            else { content.style.display = 'none'; emptyState.style.display = ''; }
+        });
+
+        function loadSummaryFromApi(profileName) {
+            fetch('/analyse/cached?profileName=' + encodeURIComponent(profileName))
+                .then(function(r) {
+                    if (r.status === 204) return null;
+                    return r.json();
+                })
+                .then(function(report) {
+                    if (!report || !report.analysis_response) {
+                        content.style.display = 'none';
+                        emptyState.style.display = '';
+                        return;
+                    }
+                    renderSummary(report.analysis_response);
+                })
+                .catch(function() {
+                    content.style.display = 'none';
+                    emptyState.style.display = '';
+                });
+        }
+
+        function renderSummary(data) {
+            if (!data) { content.style.display = 'none'; emptyState.style.display = ''; return; }
+
+            emptyState.style.display = 'none';
+            content.style.display = '';
+
+            // Scan health
+            var total = (data.scanner_success_count || 0) + (data.scanner_failure_count || 0);
+            var success = data.scanner_success_count || 0;
+            var failures = data.scanner_failure_count || 0;
+
+            document.getElementById('summaryTotalTasks').textContent = total;
+            document.getElementById('summarySuccessCount').textContent = success;
+            document.getElementById('summaryFailureCount').textContent = failures;
+            document.getElementById('summaryRegions').textContent = (data.analyzed_regions || []).length;
+
+            var healthIcon = document.getElementById('healthIcon');
+            var healthTitle = document.getElementById('healthTitle');
+            var healthSubtitle = document.getElementById('healthSubtitle');
+            var healthCard = document.getElementById('scanHealthCard');
+
+            if (failures === 0) {
+                healthIcon.innerHTML = '&#x2705;';
+                healthTitle.textContent = 'Scan Completed Successfully';
+                healthSubtitle.textContent = 'All ' + total + ' scanner tasks completed without errors.';
+                healthCard.style.borderLeft = '5px solid #198754';
+            } else if (failures > 0 && success > 0) {
+                healthIcon.innerHTML = '&#9888;';
+                healthTitle.textContent = 'Scan Completed with Warnings';
+                healthSubtitle.textContent = failures + ' of ' + total + ' tasks failed — results may be incomplete.';
+                healthCard.style.borderLeft = '5px solid #dc3545';
+            } else {
+                healthIcon.innerHTML = '&#10060;';
+                healthTitle.textContent = 'Scan Failed';
+                healthSubtitle.textContent = 'All scanner tasks failed. Check credentials and try again.';
+                healthCard.style.borderLeft = '5px solid #dc3545';
+            }
+
+            // Scanner errors table
+            var errorsSection = document.getElementById('scannerErrorsSection');
+            var errorsBody = document.getElementById('scannerErrorsBody');
+            errorsBody.innerHTML = '';
+            var errors = data.scanner_errors || [];
+            if (errors.length > 0) {
+                errorsSection.style.display = '';
+                errors.forEach(function(err) {
+                    var row = document.createElement('tr');
+                    var type = 'Error';
+                    var typeCls = 'text-danger';
+                    if (err.startsWith('TIMEOUT:')) { type = 'Timeout'; typeCls = 'text-warning'; }
+                    else if (err.startsWith('ACCESS_DENIED:')) { type = 'Access Denied'; typeCls = 'text-info'; }
+                    else if (err.startsWith('CREDENTIAL_ERROR:')) { type = 'Credentials'; typeCls = 'text-danger'; }
+
+                    // Parse scanner and region from error string
+                    var scanner = '—', region = '—', reason = err;
+                    var inMatch = err.match(/(\w+)\s+in\s+([a-z]+-[a-z]+-\d+)/);
+                    if (inMatch) { scanner = inMatch[1]; region = inMatch[2]; }
+                    // Clean up reason
+                    reason = err.replace(/^(TIMEOUT|ACCESS_DENIED|CREDENTIAL_ERROR):\s*/, '')
+                               .replace(/^\w+\s+in\s+[a-z]+-[a-z]+-\d+\s*—\s*/, '');
+
+                    row.innerHTML =
+                        '<td><span class="badge ' + typeCls + '" style="font-size:0.7rem;">' + type + '</span></td>' +
+                        '<td style="font-size:0.85rem;">' + scanner + '</td>' +
+                        '<td style="font-size:0.85rem;"><code>' + region + '</code></td>' +
+                        '<td style="font-size:0.8rem; color: var(--text-muted);">' + reason + '</td>';
+                    errorsBody.appendChild(row);
+                });
+            } else {
+                errorsSection.style.display = 'none';
+            }
+
+            // Overview metrics
+            document.getElementById('summaryTotalResources').textContent = data.total_resources || 0;
+            document.getElementById('summaryMonthlyCost').textContent = '$' + (data.total_monthly_cost || 0).toFixed(2);
+            document.getElementById('summaryIdleCount').textContent = data.idle_resources_count || 0;
+            document.getElementById('summaryPotentialSavings').textContent = '$' + (data.potential_savings || 0).toFixed(2);
+
+            // AI info
+            var filtering = data.ai_filtering || {};
+            document.getElementById('summaryAiProvider').textContent = filtering.provider || '—';
+            document.getElementById('summaryScanTime').textContent = data.timestamp ? new Date(data.timestamp).toLocaleString() : '—';
+
+            // Scan summary and regional distribution (reuse functions from sentinel.js)
+            if (typeof populateScanSummary === 'function') populateScanSummary(data);
+            if (typeof populateRegionDistribution === 'function') populateRegionDistribution(data);
+
+            // AI insights
+            var insights = data.ai_insights || {};
+
+            // Cost & Risk section (side by side)
+            var costRiskSection = document.getElementById('costRiskSection');
+            var hasCostOrRisk = insights.cost_narrative || insights.risk_overview;
+            if (hasCostOrRisk) {
+                costRiskSection.style.display = '';
+                // Render cost narrative
+                if (insights.cost_narrative) {
+                    renderNarrative('summaryAiCostNarrative', insights.cost_narrative);
+                }
+                // Render risk overview
+                if (insights.risk_overview) {
+                    renderNarrative('summaryRiskOverview', insights.risk_overview);
+                }
+            } else { costRiskSection.style.display = 'none'; }
+
+            function renderNarrative(elId, text) {
+                var el = document.getElementById(elId);
+                if (!el || !text) return;
+                var parts = text.split('\n').filter(function(p) { return p.trim(); });
+                var html = '';
+                var inList = false;
+                parts.forEach(function(part) {
+                    var trimmed = part.trim();
+                    if (trimmed.startsWith('- ')) {
+                        if (!inList) { html += '<ul class="mb-2 ps-3" style="list-style-type: disc;">'; inList = true; }
+                        html += '<li style="margin-bottom: 0.15rem;">' + trimmed.substring(2) + '</li>';
+                    } else {
+                        if (inList) { html += '</ul>'; inList = false; }
+                        html += '<p class="mb-2">' + trimmed + '</p>';
+                    }
+                });
+                if (inList) html += '</ul>';
+                el.innerHTML = html;
+            }
+
+            // Architecture insights
+            var archSection = document.getElementById('archInsightsSection');
+            var archList = document.getElementById('archInsightsList');
+            archList.innerHTML = '';
+            var archInsights = insights.architecture_insights || [];
+            if (archInsights.length > 0) {
+                archSection.style.display = '';
+                archInsights.forEach(function(ai) {
+                    var catColors = { WASTE: 'danger', REDUNDANCY: 'warning', SECURITY: 'danger', OPTIMIZATION: 'info', REGIONAL_ANOMALY: 'secondary' };
+                    var color = catColors[ai.category] || 'secondary';
+                    var div = document.createElement('div');
+                    div.className = 'mb-3 p-3 rounded';
+                    div.style.cssText = 'background: var(--card-bg); border-left: 4px solid var(--bs-' + color + ');';
+                    div.innerHTML =
+                        '<div class="d-flex align-items-center mb-1">' +
+                        '<span class="badge bg-' + color + ' me-2" style="font-size:0.65rem;">' + (ai.category || '').replace('_', ' ') + '</span>' +
+                        '</div>' +
+                        '<p class="mb-1 fw-semibold" style="color: var(--text-primary); font-size:0.9rem;">' + (ai.finding || '') + '</p>' +
+                        '<p class="mb-0 text-muted" style="font-size:0.85rem;">' + (ai.recommendation || '') + '</p>';
+                    archList.appendChild(div);
+                });
+            } else { archSection.style.display = 'none'; }
+
+            // Right-sizing
+            var rsSection = document.getElementById('rightSizingSection');
+            var rsBody = document.getElementById('rightSizingBody');
+            rsBody.innerHTML = '';
+            var rightSizing = insights.right_sizing || [];
+            if (rightSizing.length > 0) {
+                rsSection.style.display = '';
+                rightSizing.forEach(function(rs) {
+                    var savings = (rs.current_cost || 0) - (rs.projected_cost || 0);
+                    var row = document.createElement('tr');
+                    row.innerHTML =
+                        '<td style="font-size:0.85rem;"><code>' + (rs.resource_id || '') + '</code></td>' +
+                        '<td style="font-size:0.85rem;">' + (rs.current_type || '') + ' <span class="text-muted">($' + (rs.current_cost || 0).toFixed(2) + '/mo)</span></td>' +
+                        '<td style="font-size:0.85rem;" class="text-success fw-semibold">' + (rs.recommended_type || '') + ' <span>($' + (rs.projected_cost || 0).toFixed(2) + '/mo)</span></td>' +
+                        '<td style="font-size:0.85rem;" class="text-success fw-bold">$' + savings.toFixed(2) + '/mo</td>' +
+                        '<td style="font-size:0.8rem; color: var(--text-muted);">' + (rs.reasoning || '') + '</td>';
+                    rsBody.appendChild(row);
+                });
+            } else { rsSection.style.display = 'none'; }
+
+            // Prioritized actions (top 5, non-KEEP) — full list is on the dashboard
+            var actSection = document.getElementById('actionsSection');
+            var actBody = document.getElementById('actionsBody');
+            actBody.innerHTML = '';
+            var actions = (insights.prioritized_actions || []).filter(function(a) { return a.action !== 'KEEP'; }).slice(0, 5);
+            if (actions.length > 0) {
+                actSection.style.display = '';
+                var actionColors = { TERMINATE: 'danger', DOWNSIZE: 'warning', REVIEW: 'info', ENABLE: 'warning', ROTATE: 'warning', RESTRICT: 'danger', REMEDIATE: 'danger' };
+                var riskColors = { SAFE: 'success', LOW: 'info', MEDIUM: 'warning', HIGH: 'danger', CRITICAL: 'danger' };
+                actions.forEach(function(a) {
+                    var row = document.createElement('tr');
+                    var actColor = actionColors[a.action] || 'secondary';
+                    var rskColor = riskColors[a.risk] || 'secondary';
+                    row.innerHTML =
+                        '<td><span class="badge bg-' + actColor + '" style="font-size:0.7rem;">' + (a.action || '') + '</span></td>' +
+                        '<td style="font-size:0.85rem;"><code>' + (a.resource_id || '') + '</code></td>' +
+                        '<td style="font-size:0.85rem;">' + (a.resource_type || '') + '</td>' +
+                        '<td style="font-size:0.85rem;"><code>' + (a.region || '') + '</code></td>' +
+                        '<td><span class="badge bg-' + rskColor + '" style="font-size:0.65rem;">' + (a.risk || '') + '</span></td>' +
+                        '<td style="font-size:0.85rem;" class="text-success fw-semibold">' + (a.estimated_savings > 0 ? '$' + a.estimated_savings.toFixed(2) + '/mo' : '—') + '</td>' +
+                        '<td style="font-size:0.8rem; color: var(--text-muted);">' + (a.reasoning || '') + '</td>';
+                    actBody.appendChild(row);
+                });
+            } else { actSection.style.display = 'none'; }
+
+            // Well Architected (positive findings)
+            var waSection = document.getElementById('wellArchitectedSection');
+            var waList = document.getElementById('wellArchitectedList');
+            waList.innerHTML = '';
+            var wellArchitected = insights.well_architected || [];
+            if (wellArchitected.length > 0) {
+                waSection.style.display = '';
+                var catIcons = { COST_OPTIMIZED: '$', RELIABLE: '&#x1f6e1;', SECURE: '&#x1f512;', PERFORMANT: '&#x26a1;', OPERATIONAL: '&#x2699;' };
+                wellArchitected.forEach(function(wa) {
+                    var icon = catIcons[wa.category] || '&#x2705;';
+                    var div = document.createElement('div');
+                    div.className = 'mb-3 p-3 rounded';
+                    div.style.cssText = 'background: var(--card-bg); border-left: 4px solid #198754;';
+                    div.innerHTML =
+                        '<div class="d-flex align-items-center mb-1">' +
+                        '<span class="me-2">' + icon + '</span>' +
+                        '<span class="badge bg-success me-2" style="font-size:0.65rem;">' + (wa.category || '').replace(/_/g, ' ') + '</span>' +
+                        '</div>' +
+                        '<p class="mb-1 fw-semibold" style="color: var(--text-primary); font-size:0.9rem;">' + (wa.finding || '') + '</p>' +
+                        '<p class="mb-0 text-muted" style="font-size:0.85rem;">' + (wa.detail || '') + '</p>';
+                    waList.appendChild(div);
+                });
+            } else { waSection.style.display = 'none'; }
+
+            // Cleanup Plan
+            var cpSection = document.getElementById('cleanupPlanSection');
+            var cpList = document.getElementById('cleanupPlanList');
+            cpList.innerHTML = '';
+            var cleanupPlan = (insights.cleanup_plan || []).filter(function(cp) {
+                return cp.actions && cp.actions.trim() !== '';
+            });
+            if (cleanupPlan.length > 0) {
+                cpSection.style.display = '';
+                var phaseColors = { IMMEDIATE: 'success', SHORT_TERM: 'warning', LONG_TERM: 'info' };
+                var phaseIcons = { IMMEDIATE: '&#x26a1;', SHORT_TERM: '&#x1f4c5;', LONG_TERM: '&#x1f3af;' };
+                var phaseLabels = { IMMEDIATE: 'Immediate (Quick Wins)', SHORT_TERM: 'Short Term (1-2 Weeks)', LONG_TERM: 'Long Term (Strategic)' };
+                cleanupPlan.forEach(function(cp) {
+                    var color = phaseColors[cp.phase] || 'secondary';
+                    var icon = phaseIcons[cp.phase] || '&#x2022;';
+                    var label = phaseLabels[cp.phase] || cp.phase;
+                    var savingsText = (cp.estimated_savings || 0) > 0
+                        ? '$' + (cp.estimated_savings).toFixed(2) + '/mo'
+                        : 'No direct cost';
+                    // Split semicolon-separated actions into bullet list
+                    var actionItems = cp.actions.split(';').map(function(a) { return a.trim(); }).filter(function(a) { return a; });
+                    var bulletHtml = '<ul class="mb-0 ps-3" style="list-style-type: disc;">';
+                    actionItems.forEach(function(item) {
+                        bulletHtml += '<li style="color: var(--text-primary); font-size: 0.85rem; margin-bottom: 0.25rem;">' + item + '</li>';
+                    });
+                    bulletHtml += '</ul>';
+                    var div = document.createElement('div');
+                    div.className = 'mb-3 p-3 rounded';
+                    div.style.cssText = 'background: var(--card-bg); border-left: 4px solid var(--bs-' + color + ');';
+                    div.innerHTML =
+                        '<div class="d-flex justify-content-between align-items-center mb-2">' +
+                        '<div><span class="me-2">' + icon + '</span><span class="badge bg-' + color + '" style="font-size:0.7rem;">' + label + '</span></div>' +
+                        '<div class="text-end">' +
+                        '<span class="badge bg-secondary me-2" style="font-size:0.7rem;">' + (cp.resources_affected || 0) + ' resources</span>' +
+                        '<span class="badge bg-' + ((cp.estimated_savings || 0) > 0 ? 'success' : 'secondary') + '" style="font-size:0.7rem;">' + savingsText + '</span>' +
+                        '</div></div>' +
+                        bulletHtml +
+                        (cp.risk_level ? '<p class="mb-0 mt-2 text-muted" style="font-size:0.78rem;"><em>' + cp.risk_level + '</em></p>' : '');
+                    cpList.appendChild(div);
+                });
+            } else { cpSection.style.display = 'none'; }
+        }
+    })();
+
+    // Auto-make all card sections collapsible
+    document.addEventListener('DOMContentLoaded', function() {
+        var cards = document.querySelectorAll('#summaryContent .card');
+        cards.forEach(function(card, idx) {
+            var header = card.querySelector('.card-header');
+            var body = card.querySelector('.card-body');
+            if (!header || !body) return;
+
+            var collapseId = 'summaryCollapse' + idx;
+            body.id = collapseId;
+            body.classList.add('collapse', 'show');
+
+            // Add chevron
+            var chevron = document.createElement('span');
+            chevron.className = 'collapse-chevron';
+            chevron.style.cssText = 'font-size:0.8rem; color: inherit; opacity: 0.7;';
+            chevron.innerHTML = '&#x25B2;';
+
+            header.classList.add('sentinel-collapse-toggle');
+            header.setAttribute('data-bs-toggle', 'collapse');
+            header.setAttribute('data-bs-target', '#' + collapseId);
+            header.setAttribute('aria-expanded', 'true');
+            header.setAttribute('role', 'button');
+            header.style.display = 'flex';
+            header.style.alignItems = 'center';
+            header.style.justifyContent = 'space-between';
+            header.appendChild(chevron);
+
+            body.addEventListener('shown.bs.collapse', function() { chevron.innerHTML = '&#x25B2;'; });
+            body.addEventListener('hidden.bs.collapse', function() { chevron.innerHTML = '&#x25BC;'; });
+        });
+    });
+    </script>
+</body>
+</html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{pages/layout/fragments/head :: head('Jobs')}">
+    <title>Jobs — Cloud Resource Sentinel</title>
+</head>
+<body>
+    <div th:replace="~{pages/layout/fragments/header :: header}"></div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <nav th:replace="~{pages/layout/fragments/sidebar :: sidebar}"></nav>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Jobs</h1>
+                    <div>
+                        <span class="text-muted small me-3">Capacity: <strong id="jobCapacity">-</strong></span>
+                        <button class="btn btn-sm btn-outline-primary" onclick="refreshJobs()">Refresh</button>
+                    </div>
+                </div>
+
+                <div id="activeJobsSection">
+                    <h5 class="mb-3">Active</h5>
+                    <div id="activeJobsList">
+                        <p class="text-muted">Loading...</p>
+                    </div>
+                </div>
+
+                <div id="completedJobsSection" class="mt-4">
+                    <h5 class="mb-3">Completed</h5>
+                    <div id="completedJobsList">
+                        <p class="text-muted">Loading...</p>
+                    </div>
+                </div>
+
+                <div class="card mt-4 border-0 shadow-sm">
+                    <div class="card-body">
+                        <h6>Saved Reports</h6>
+                        <p class="text-muted small mb-2">Reports stored on disk (max 2 per account). Select a profile to view.</p>
+                        <div class="row g-2 align-items-end">
+                            <div class="col-md-4">
+                                <select class="form-select form-select-sm" id="reportProfileSelect">
+                                    <option value="">Select profile...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-sm btn-primary" id="loadReportBtn" disabled>Load Report</button>
+                            </div>
+                        </div>
+                        <div id="savedReportsList" class="mt-3"></div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/sentinel.js(v=1747030000)}"></script>
+    <script>
+        function refreshJobs() {
+            fetch('/analyse/jobs')
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    document.getElementById('jobCapacity').textContent =
+                        data.active_count + ' / ' + data.capacity + (data.at_capacity ? ' (full)' : '');
+
+                    var active = (data.jobs || []).filter(function(j) { return j.phase !== 'complete' && j.phase !== 'error'; });
+                    var completed = (data.jobs || []).filter(function(j) { return j.phase === 'complete' || j.phase === 'error'; });
+
+                    var activeEl = document.getElementById('activeJobsList');
+                    if (active.length === 0) {
+                        activeEl.innerHTML = '<p class="text-muted">No active jobs</p>';
+                    } else {
+                        activeEl.innerHTML = active.map(function(j) {
+                            return '<div class="card mb-2 border-0 shadow-sm">' +
+                                '<div class="card-body py-2">' +
+                                '<div class="d-flex justify-content-between align-items-center">' +
+                                '<div><strong>' + esc(j.profile_name) + '</strong> <span class="text-muted small">(' + esc(j.account_id) + ')</span></div>' +
+                                '<span class="badge bg-primary">' + esc(j.phase) + '</span>' +
+                                '</div>' +
+                                '<div class="progress mt-2" style="height:6px;">' +
+                                '<div class="progress-bar progress-bar-striped progress-bar-animated" style="width:' + j.progress + '%;"></div>' +
+                                '</div>' +
+                                '<small class="text-muted">' + esc(j.message) + ' — ' + j.progress + '%</small>' +
+                                '</div></div>';
+                        }).join('');
+                    }
+
+                    var completedEl = document.getElementById('completedJobsList');
+                    if (completed.length === 0) {
+                        completedEl.innerHTML = '<p class="text-muted">No completed jobs in this session</p>';
+                    } else {
+                        completedEl.innerHTML = completed.map(function(j) {
+                            var badge = j.phase === 'complete' ? 'bg-success' : 'bg-danger';
+                            var viewBtn = j.phase === 'complete'
+                                ? ' <a href="#" class="btn btn-sm btn-outline-primary ms-2" onclick="viewJobReport(\'' + esc(j.profile_name) + '\');return false;">View</a>'
+                                : '';
+                            return '<div class="card mb-2 border-0 shadow-sm">' +
+                                '<div class="card-body py-2">' +
+                                '<div class="d-flex justify-content-between align-items-center">' +
+                                '<div><strong>' + esc(j.profile_name) + '</strong> <span class="text-muted small">(' + esc(j.account_id) + ')</span></div>' +
+                                '<div><span class="badge ' + badge + '">' + esc(j.phase) + '</span>' + viewBtn + '</div>' +
+                                '</div>' +
+                                '<small class="text-muted">' + esc(j.message) + '</small>' +
+                                '</div></div>';
+                        }).join('');
+                    }
+                });
+        }
+
+        function viewJobReport(profileName) {
+            fetch('/analyse/cached?profileName=' + encodeURIComponent(profileName))
+                .then(function(r) {
+                    if (r.status === 204) return null;
+                    return r.json();
+                })
+                .then(function(report) {
+                    if (report) {
+                        sessionStorage.setItem('sentinel-report', JSON.stringify(report));
+                        window.location.href = '/dashboard';
+                    } else {
+                        showToast('No report found for ' + profileName, 'info');
+                    }
+                })
+                .catch(function() {
+                    showToast('Failed to load report');
+                });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            refreshJobs();
+            setInterval(refreshJobs, 3000);
+
+            fetch('/profiles')
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    var sel = document.getElementById('reportProfileSelect');
+                    var btn = document.getElementById('loadReportBtn');
+                    (data.profiles || []).forEach(function(p) {
+                        var opt = document.createElement('option');
+                        opt.value = p;
+                        opt.textContent = p;
+                        sel.appendChild(opt);
+                    });
+                    sel.addEventListener('change', function() { btn.disabled = !this.value; });
+                    btn.addEventListener('click', function() {
+                        if (!sel.value) return;
+                        fetch('/analyse/cached?profileName=' + encodeURIComponent(sel.value))
+                            .then(function(r) {
+                                if (r.status === 204) return null;
+                                return r.json();
+                            })
+                            .then(function(report) {
+                                if (report) {
+                                    sessionStorage.setItem('sentinel-report', JSON.stringify(report));
+                                    showToast('Report loaded for ' + sel.value);
+                                    window.location.href = '/dashboard';
+                                } else {
+                                    showToast('No report found for this profile', 'info');
+                                }
+                            });
+                    });
+                });
+        });
+    </script>
+</body>
+</html>

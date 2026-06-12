@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{pages/layout/fragments/head :: head('Audit Trail')}">
+    <title>Audit Trail — Cloud Resource Sentinel</title>
+</head>
+<body>
+    <div th:replace="~{pages/layout/fragments/header :: header}"></div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <nav th:replace="~{pages/layout/fragments/sidebar :: sidebar}"></nav>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2 fw-bold" style="color: var(--text-primary);">Audit Trail</h1>
+                    <button class="btn btn-sm btn-outline-primary" onclick="loadAuditHistory()">Refresh</button>
+                </div>
+
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-sm mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Timestamp</th>
+                                        <th>Account</th>
+                                        <th>Profile</th>
+                                        <th>Category</th>
+                                        <th>Status</th>
+                                        <th>Resources</th>
+                                        <th>Monthly Cost</th>
+                                        <th>Actionable</th>
+                                        <th title="Cost / Security / Governance finding counts">Findings</th>
+                                        <th>Savings</th>
+                                        <th>AI</th>
+                                        <th>Regions</th>
+                                        <th title="Total scan duration including AI analysis">Duration</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="auditTableBody">
+                                    <tr>
+                                        <td colspan="14" class="text-center text-muted py-4">Loading...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/sentinel.js(v=1747030000)}"></script>
+    <script>
+        function loadAuditHistory() {
+            fetch('/analyse/audit?limit=50')
+                .then(function(r) { return r.json(); })
+                .then(function(entries) {
+                    var tbody = document.getElementById('auditTableBody');
+                    if (!entries || entries.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="14" class="text-center text-muted py-4">No scan history yet. Run an analysis to get started.</td></tr>';
+                        return;
+                    }
+
+                    tbody.innerHTML = entries.map(function(e) {
+                        var statusBadge = e.status === 'complete' ? 'bg-success'
+                            : e.status === 'cancelled' ? 'bg-warning text-dark' : 'bg-danger';
+                        var ts = e.timestamp ? new Date(e.timestamp).toLocaleString() : '-';
+                        var duration = e.duration_ms ? (e.duration_ms / 1000).toFixed(1) + 's' : '-';
+                        var aiText = e.ai_enabled
+                            ? esc(e.ai_provider) + (e.ai_model ? ' / ' + esc(e.ai_model) : '')
+                            : 'Off';
+                        var aiBadge = e.ai_enabled ? 'bg-primary' : 'bg-secondary';
+                        var cat = e.scan_category || 'FULL';
+                        var catLabel = cat === 'COST_OPTIMIZATION' ? 'Cost' : cat === 'SECURITY_GOVERNANCE' ? 'Security' : 'Full';
+                        var catBadge = cat === 'COST_OPTIMIZATION' ? 'bg-warning text-dark' : cat === 'SECURITY_GOVERNANCE' ? 'bg-danger' : 'bg-primary';
+                        var viewBtn = e.status === 'complete'
+                            ? '<button class="btn btn-sm btn-outline-primary" onclick="viewAuditReport(\'' + esc(e.profile_name) + '\')">View</button>'
+                            : '';
+
+                        return '<tr>' +
+                            '<td class="small">' + ts + '</td>' +
+                            '<td><code class="small">' + esc(e.account_id) + '</code></td>' +
+                            '<td class="small fw-semibold">' + esc(e.profile_name) + '</td>' +
+                            '<td><span class="badge ' + catBadge + '">' + catLabel + '</span></td>' +
+                            '<td><span class="badge ' + statusBadge + '">' + esc(e.status) + '</span></td>' +
+                            '<td>' + (e.resource_count || 0) + '</td>' +
+                            '<td>$' + (e.total_cost || 0).toFixed(2) + '</td>' +
+                            '<td>' + (e.idle_count || 0) + '</td>' +
+                            '<td class="small">' +
+                                (e.cost_findings_count ? '<span class="badge" style="background:#ed8936;font-size:0.6rem;" title="Cost">' + e.cost_findings_count + '</span> ' : '') +
+                                (e.security_findings_count ? '<span class="badge" style="background:#f56565;font-size:0.6rem;" title="Security">' + e.security_findings_count + '</span> ' : '') +
+                                (e.governance_findings_count ? '<span class="badge" style="background:#667eea;font-size:0.6rem;" title="Governance">' + e.governance_findings_count + '</span>' : '') +
+                                (!e.cost_findings_count && !e.security_findings_count && !e.governance_findings_count ? '-' : '') +
+                            '</td>' +
+                            '<td>$' + (e.potential_savings || 0).toFixed(2) + '</td>' +
+                            '<td><span class="badge ' + aiBadge + ' small">' + aiText + '</span></td>' +
+                            '<td>' + (e.regions_scanned || 0) + '</td>' +
+                            '<td class="small text-muted" title="Total scan duration including AI analysis">' + duration + '</td>' +
+                            '<td>' + viewBtn + '</td>' +
+                            '</tr>';
+                    }).join('');
+                })
+                .catch(function() {
+                    document.getElementById('auditTableBody').innerHTML =
+                        '<tr><td colspan="14" class="text-center text-muted py-4">Failed to load audit history</td></tr>';
+                });
+        }
+
+        function viewAuditReport(profileName) {
+            fetch('/analyse/cached?profileName=' + encodeURIComponent(profileName))
+                .then(function(r) {
+                    if (r.status === 204) return null;
+                    return r.json();
+                })
+                .then(function(report) {
+                    if (report && report.analysis_response) {
+                        sessionStorage.setItem('sentinel-report', JSON.stringify(report));
+                        window.location.href = '/dashboard';
+                    } else {
+                        showToast('No report found for ' + profileName, 'info');
+                    }
+                })
+                .catch(function() { showToast('Failed to load report'); });
+        }
+
+        document.addEventListener('DOMContentLoaded', loadAuditHistory);
+    </script>
+</body>
+</html>

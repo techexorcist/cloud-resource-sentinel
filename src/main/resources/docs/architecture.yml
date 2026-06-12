@@ -1,0 +1,57 @@
+id: architecture
+title: Architecture
+sections:
+  - title: System Architecture
+    type: cards
+    columns: 3
+    items:
+      - title: Backend
+        color: primary
+        items: ["Java 21 + Spring Boot 4.0", "Spring AI 2.0 (Ollama + Bedrock)", "AWS SDK v2 with paginators", "Virtual threads for concurrency", "Caffeine cache for pricing"]
+      - title: Frontend
+        color: success
+        items: ["Thymeleaf templates", "Bootstrap 5.3", "Chart.js for visualisations", "Vanilla JS (no framework)", "3 themes (light, warm, dark)"]
+      - title: Infrastructure
+        color: warning
+        items: ["Docker Compose (2 services)", "Ollama for local AI", "File-based report storage", "No database required", "AWS SSO integration"]
+  - title: Scan Flow
+    type: flow
+    steps:
+      - {label: "Submit Job", color: primary, tooltip: "Validates request, resolves AWS credentials (SSO/static/default), creates async job with unique ID. Scans run one at a time; others queue automatically."}
+      - {label: "Scan 50 Resource Types", color: info, tooltip: "Scans all 50 resource types across selected regions in parallel. Each scanner queries AWS APIs for resources, collects CloudWatch metrics (CPU, invocations, traffic, storage), and applies recommendation thresholds. Covers compute, databases, storage, networking, serverless, security, and governance."}
+      - {label: "Fetch Pricing", color: warning, tooltip: "Looks up per-region pricing for each resource type. All 50 scanners route through PricingService → FallbackPricing → RegionalPricingData (JSON with 30 regions, 7 service categories: EC2, RDS, ElastiCache, Redshift, OpenSearch, SageMaker + 38 service-level rates). Cached with 24hr TTL, refreshable from AWS Pricing API with automatic cache invalidation."}
+      - {label: "Detect RI/SP", color: secondary, tooltip: "Checks for Reserved Instances and Savings Plans that cover discovered resources. Overlays reservation data to avoid flagging covered resources as idle."}
+      - {label: "Correlate Resources", color: info, tooltip: "Runs 39 correlation rules across 7 categories: attachment (EBS/EIP on stopped EC2), orphaned (snapshots, log groups, secrets), isolated (databases/caches/NAT in regions with no compute), load balancer (zero targets), security (orphaned certs, alarms, MFA gaps, KMS pending deletion, CloudTrail disabled), infrastructure (CloudFormation failures, idle DMS), and dependency chains (abandoned ML projects, idle pipelines, stale DNS)."}
+      - {label: "AI Analysis", color: primary, tooltip: "Sends actionable resources to the selected AI model (Ollama or Bedrock). AI generates per-resource reasoning, risk assessment, right-sizing suggestions, and architecture insights. Cost narrative, risk overview, and executive summary statistics are computed server-side by PromptBuilder for accuracy — the AI adds interpretive judgment only."}
+      - {label: "Save Report", color: success, tooltip: "Persists the scan report as JSON to ~/.cloud-sentinel/reports/ using atomic writes (temp file + move). Synchronized to prevent concurrent corruption. Keeps up to 3 reports per account. Computes diff summary against the previous report (added/removed resources, cost changes)."}
+      - {label: "Log Audit", color: danger, tooltip: "Records scan metadata to the audit trail: timestamp, account, profile, status, resource count, cost, savings, AI provider/model used, duration. Viewable on the Audit Trail page."}
+  - title: Finding Classification
+    type: cards
+    columns: 2
+    items:
+      - title: Finding Types
+        color: danger
+        items: ["COST — 39 scanners for idle, underutilised, and over-provisioned resources", "SECURITY — 7 scanners (IAM, KMS, ACM, WAF, Shield, CloudTrail, Secrets Manager)", "GOVERNANCE — 4 scanners (CloudFormation, CloudWatch, VPC, SSM Parameter Store)", "Each scanner declares its finding type via findingType() on the ResourceScanner interface", "Dashboard tabs filter all sections (charts, breakdown, correlations) by finding type"]
+      - title: Severity Levels
+        color: warning
+        items: ["CRITICAL — expired certs, exposed credentials, misconfigured security controls", "HIGH — disabled logging, missing MFA, disabled key rotation, high-cost idle resources (>$50/mo)", "MEDIUM — stale resources, missing policies, moderate-cost idle resources ($10-$50/mo)", "LOW — low-cost idle resources, minor governance issues", "INFO — active/healthy resources, no action required", "Severity is derived by ResourceAnalyzer.classifySeverity() from recommendation prefix + finding type + cost"]
+  - title: Read-Only Security Guardrails
+    type: cards
+    columns: 2
+    items:
+      - title: Runtime Protection
+        color: danger
+        items: ["ReadOnlyInterceptor — AWS SDK ExecutionInterceptor that blocks all mutating API calls before they hit the network", "ReadOnlyAwsClientFactory — centralized factory that builds every AWS client with the interceptor attached", "Only read operations allowed: Describe*, List*, Get*, Search*, BatchGet*, Scan*, Query*, Head*, plus STS"]
+      - title: Build-Time + AI Protection
+        color: primary
+        items: ["ReadOnlyGuardrailTest — architecture test that scans all source files and fails the build if any code bypasses the factory", "AI Prompt Guardrail — safety section in both prompt templates instructs the AI to never output executable commands or scripts", "All recommendations are advisory: Consider, Recommend, Review — never Run this command"]
+  - title: AI Prompt Architecture
+    type: cards
+    columns: 2
+    items:
+      - title: Dual Prompt Templates
+        color: primary
+        items: ["analysis-prompt.txt — cost-focused prompt for cost optimization findings", "analysis-security-prompt.txt — security/governance-focused prompt with severity-based prioritization", "Prompt dispatch: security prompt fires when >= 5 security/governance findings OR they make up the majority", "Both prompts include finding_type and severity in resource lines for context-aware AI reasoning", "PRE-COMPUTED COST ANALYSIS section injected by PromptBuilder with spend breakdown, top-5, idle vs active", "cost_narrative and risk_overview removed from AI schema — computed server-side, never by AI", "executive_summary asks for interpretive judgment only — stats prepended by server"]
+      - title: Model Capability Filtering
+        color: info
+        items: ["Ollama models are tagged as full_scan_capable based on size (>= 4 GB)", "UI filters model dropdown when scan category is Full Scan — small models hidden to prevent timeouts", "Bedrock models (Claude) always handle full scans — no filtering applied", "Model size displayed in dropdown for transparency"]

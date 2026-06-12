@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{pages/layout/fragments/head :: head('Analyse Resources')}">
+    <title>Analyse Resources — Cloud Resource Sentinel</title>
+</head>
+<body>
+    <nav th:replace="~{pages/layout/fragments/header :: header}"></nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <nav th:replace="~{pages/layout/fragments/sidebar :: sidebar}"></nav>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2 fw-bold" style="color: var(--text-primary);">Analyse Resources</h1>
+                </div>
+
+                <div id="errorArea"></div>
+
+                <form id="analyzeForm">
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-transparent border-0">
+                            <strong style="color: var(--text-primary);">AWS Credentials</strong>
+                        </div>
+                        <div class="card-body">
+                            <div class="btn-group mb-3" role="group">
+                                <input type="radio" class="btn-check" name="authMode" id="authModeProfile" value="profile" checked>
+                                <label class="btn btn-outline-primary" for="authModeProfile">Use AWS Profile</label>
+                                <input type="radio" class="btn-check" name="authMode" id="authModeCredentials" value="credentials">
+                                <label class="btn btn-outline-primary" for="authModeCredentials">Enter Credentials</label>
+                            </div>
+
+                            <div id="profileSection">
+                                <div class="mb-3">
+                                    <label for="profileName" class="form-label" style="color: var(--text-primary);">AWS Profile</label>
+                                    <select class="form-select" id="profileName" name="profileName">
+                                        <option value="" disabled selected>Select a profile...</option>
+                                        <option th:each="profile : ${availableProfiles}" th:value="${profile}" th:text="${profile}">profile-name</option>
+                                    </select>
+                                    <div class="form-text">Profiles from ~/.aws/config and ~/.aws/credentials. Supports SSO profiles.</div>
+                                    <div id="profileCredCheck" class="mt-2" style="display:none;"></div>
+                                </div>
+                            </div>
+
+                            <div id="credentialsSection" style="display: none;">
+                                <div class="mb-3">
+                                    <label for="credentialLabel" class="form-label" style="color: var(--text-primary);">Scan Name <span class="text-muted">(used as identifier in reports)</span></label>
+                                    <input type="text" class="form-control" id="credentialLabel" name="credentialLabel" placeholder="e.g. prod-account, staging-123456789012">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="accessKeyId" class="form-label" style="color: var(--text-primary);">Access Key ID</label>
+                                    <input type="text" class="form-control" id="accessKeyId" name="accessKeyId" placeholder="AKIA...">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="secretAccessKey" class="form-label" style="color: var(--text-primary);">Secret Access Key</label>
+                                    <input type="text" class="form-control" id="secretAccessKey" name="secretAccessKey" placeholder="Secret access key" autocomplete="off">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="sessionToken" class="form-label" style="color: var(--text-primary);">Session Token <span class="text-muted">(optional)</span></label>
+                                    <input type="text" class="form-control" id="sessionToken" name="sessionToken" placeholder="Temporary session token">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-transparent border-0">
+                            <strong style="color: var(--text-primary);">Regions</strong>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex flex-wrap gap-2 mb-3 align-items-center" id="regionGroupBadges"></div>
+                            <div class="mb-3">
+                                <button type="button" class="btn btn-sm btn-outline-primary me-1" id="selectAllRegions">Select All</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" id="clearAllRegions">Clear All</button>
+                            </div>
+                            <div class="row g-2" id="regionCheckboxGrid">
+                                <div class="col-md-3 col-sm-4 col-6" th:each="region : ${availableRegions}">
+                                    <div class="form-check">
+                                        <input class="form-check-input region-checkbox" type="checkbox" name="regions" th:value="${region}" th:id="'region-' + ${region}">
+                                        <label class="form-check-label small" th:for="'region-' + ${region}" th:text="${region}">us-east-1</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-transparent border-0">
+                            <strong style="color: var(--text-primary);">Scan Category</strong>
+                        </div>
+                        <div class="card-body">
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" name="scanCategory" id="catCost" value="COST_OPTIMIZATION">
+                                <label class="btn btn-outline-success" for="catCost">Cost &amp; Idle Resources</label>
+                                <input type="radio" class="btn-check" name="scanCategory" id="catSecurity" value="SECURITY_GOVERNANCE">
+                                <label class="btn btn-outline-warning" for="catSecurity">Security &amp; Governance</label>
+                                <input type="radio" class="btn-check" name="scanCategory" id="catFull" value="FULL" checked>
+                                <label class="btn btn-outline-primary" for="catFull">Full Scan</label>
+                            </div>
+                            <div class="form-text mt-2" style="color: var(--text-muted);">
+                                <strong style="color: var(--text-secondary);">Cost &amp; Idle Resources:</strong> API Gateway, Athena, Aurora, CloudFront, CodePipeline, DMS, DocumentDB, DynamoDB, EBS, EBS Snapshots, EC2, ECR, ECS, EFS, EKS, Elastic Beanstalk, Elastic IP, ElastiCache, ELB, FSx, Glue, Kinesis, Lambda, Lightsail, Managed Grafana, MemoryDB, NAT Gateway, Neptune, OpenSearch, RDS, RDS Snapshots, Redshift, Route 53, S3, SageMaker, SNS, SQS, Step Functions, Transfer Family<br>
+                                <strong style="color: var(--text-secondary);">Security &amp; Governance:</strong> ACM, CloudFormation, CloudTrail, CloudWatch, IAM, KMS, Parameter Store, Secrets Manager, Shield, VPC, WAF<br>
+                                <strong style="color: var(--text-secondary);">Full Scan:</strong> All 50 resource types
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-transparent border-0">
+                            <strong style="color: var(--text-primary);">AI Filtering</strong>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="enableAiFiltering" name="enableAiFiltering">
+                                <label class="form-check-label" for="enableAiFiltering" style="color: var(--text-primary);">Enable AI-powered idle resource detection</label>
+                            </div>
+                            <div id="aiUnavailableBanner" class="alert alert-warning py-2 mb-3 small border-0" role="alert" style="display: none;"></div>
+                            <div id="aiProviderSection" style="display: none;">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label" style="color: var(--text-primary);">AI Provider</label>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="aiProvider" id="providerBedrock" value="bedrock" checked>
+                                            <label class="form-check-label" for="providerBedrock" style="color: var(--text-secondary);">Amazon Bedrock</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="aiProvider" id="providerOllama" value="ollama">
+                                            <label class="form-check-label" for="providerOllama" style="color: var(--text-secondary);">Ollama (Local)</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label" style="color: var(--text-primary);">AI Model</label>
+                                        <select class="form-select form-select-sm" id="aiModelSelect">
+                                            <option value="">Loading models...</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-3 mb-4">
+                        <button type="submit" class="btn btn-primary btn-lg fw-semibold flex-grow-1" id="analyzeButton">
+                            <span id="analyzeSpinner" class="spinner-border spinner-border-sm me-2" role="status" style="display: none;"></span>
+                            <span id="analyzeButtonText">Analyse Resources</span>
+                        </button>
+                        <button type="button" class="btn btn-outline-primary btn-lg fw-semibold" id="scanAllBtn" onclick="scanAllProfiles()">
+                            <span id="scanAllSpinner" class="spinner-border spinner-border-sm me-2" role="status" style="display: none;"></span>
+                            Scan All Profiles
+                        </button>
+                    </div>
+                </form>
+
+                <div id="resultsSection" style="display: none;">
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-transparent border-0">
+                            <strong style="color: var(--text-primary);">Analysis Results</strong>
+                        </div>
+                        <div class="card-body">
+                            <div id="resultsContent"></div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/sentinel.js(v=1747030000)}"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Clear stale error banners from previous scan attempts
+        var staleBanner = document.getElementById('credentialErrorBanner');
+        if (staleBanner) staleBanner.remove();
+
+        var profileSelect = document.getElementById('profileName');
+        var checkDiv = document.getElementById('profileCredCheck');
+        if (!profileSelect || !checkDiv) return;
+
+        function checkProfile(profile) {
+            if (!profile) { checkDiv.style.display = 'none'; return; }
+            checkDiv.style.display = '';
+            checkDiv.innerHTML = '<small class="text-muted">Checking credentials...</small>';
+            fetch('/profiles/check?profileName=' + encodeURIComponent(profile))
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.status === 'valid') {
+                        checkDiv.innerHTML = '<div class="alert alert-success py-1 px-2 mb-0 small border-0">Credentials valid — Account: <strong>' + esc(data.account_id) + '</strong></div>';
+                    } else {
+                        var fix = data.fix ? '<br><code>' + esc(data.fix) + '</code>' : '';
+                        checkDiv.innerHTML = '<div class="alert alert-warning py-1 px-2 mb-0 small border-0"><strong>Credentials issue:</strong> ' + esc(data.error) + fix + '</div>';
+                    }
+                })
+                .catch(function() { checkDiv.style.display = 'none'; });
+        }
+
+        profileSelect.addEventListener('change', function() { checkProfile(this.value); });
+
+        // Auto-check on page load if a profile is already selected
+        if (profileSelect.value) { checkProfile(profileSelect.value); }
+
+        // Wire up Scan All button explicitly (belt + suspenders with onclick)
+        var scanAllBtn = document.getElementById('scanAllBtn');
+        if (scanAllBtn) {
+            scanAllBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (typeof scanAllProfiles === 'function') {
+                    scanAllProfiles();
+                } else {
+                    alert('scanAllProfiles function not found — JS file may not have loaded correctly. Try hard refresh (Cmd+Shift+R).');
+                }
+            });
+        }
+    });
+    </script>
+</body>
+</html>

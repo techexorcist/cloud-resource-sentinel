@@ -1,0 +1,246 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "SentinelEC2ReadAccess",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:DescribeInstances",
+        "ec2:DescribeVolumes",
+        "ec2:DescribeSnapshots",
+        "ec2:DescribeAddresses",
+        "ec2:DescribeNatGateways",
+        "ec2:DescribeSubnets",
+        "ec2:DescribeVpcs",
+        "ec2:DescribeRegions",
+        "ec2:DescribeReservedInstances",
+        "ec2:DescribeTags"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "SentinelRDSReadAccess",
+      "Effect": "Allow",
+      "Action": [
+        "rds:DescribeDBInstances",
+        "rds:DescribeDBClusters",
+        "rds:DescribeDBSnapshots",
+        "rds:DescribeReservedDBInstances",
+        "rds:ListTagsForResource"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "SentinelS3ReadAccess",
+      "Effect": "Allow",
+      "Action": [
+        "s3:ListAllMyBuckets",
+        "s3:GetBucketLocation"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "SentinelELBReadAccess",
+      "Effect": "Allow",
+      "Action": [
+        "elasticloadbalancing:DescribeLoadBalancers",
+        "elasticloadbalancing:DescribeTags"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "SentinelLambdaReadAccess",
+      "Effect": "Allow",
+      "Action": [
+        "lambda:ListFunctions"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "SentinelDynamoDBReadAccess",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:ListTables",
+        "dynamodb:DescribeTable"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "SentinelElastiCacheReadAccess",
+      "Effect": "Allow",
+      "Action": [
+        "elasticache:DescribeCacheClusters",
+        "elasticache:DescribeReservedCacheNodes"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "SentinelECSEKSReadAccess",
+      "Effect": "Allow",
+      "Action": [
+        "ecs:ListClusters",
+        "ecs:DescribeClusters",
+        "eks:ListClusters",
+        "eks:DescribeCluster",
+        "eks:ListNodegroups"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "SentinelCloudWatchReadAccess",
+      "Effect": "Allow",
+      "Action": [
+        "cloudwatch:GetMetricStatistics",
+        "cloudwatch:ListMetrics",
+        "cloudwatch:DescribeAlarms",
+        "logs:DescribeLogGroups"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "SentinelIAMReadAccess",
+      "Effect": "Allow",
+      "Action": [
+        "iam:ListUsers",
+        "iam:ListRoles",
+        "iam:ListMFADevices",
+        "iam:ListAccessKeys",
+        "iam:GetAccessKeyLastUsed"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "SentinelSecurityReadAccess",
+      "Effect": "Allow",
+      "Action": [
+        "kms:ListKeys",
+        "kms:DescribeKey",
+        "kms:GetKeyRotationStatus",
+        "acm:ListCertificates",
+        "acm:DescribeCertificate",
+        "secretsmanager:ListSecrets",
+        "secretsmanager:DescribeSecret",
+        "wafv2:ListWebACLs",
+        "wafv2:GetWebACL",
+        "wafv2:ListResourcesForWebACL",
+        "shield:DescribeSubscription",
+        "shield:ListProtections",
+        "cloudtrail:DescribeTrails",
+        "cloudtrail:GetTrailStatus"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "SentinelGovernanceReadAccess",
+      "Effect": "Allow",
+      "Action": [
+        "cloudformation:DescribeStacks",
+        "cloudformation:ListStackResources",
+        "ssm:DescribeParameters"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "SentinelDatabaseReadAccess",
+      "Effect": "Allow",
+      "Action": [
+        "redshift:DescribeClusters",
+        "opensearch:ListDomainNames",
+        "opensearch:DescribeDomain",
+        "neptune:DescribeDBClusters",
+        "docdb:DescribeDBClusters",
+        "memorydb:DescribeClusters"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "SentinelComputeAndStorageReadAccess",
+      "Effect": "Allow",
+      "Action": [
+        "sagemaker:ListEndpoints",
+        "sagemaker:ListNotebookInstances",
+        "elasticbeanstalk:DescribeEnvironments",
+        "lightsail:GetInstances",
+        "lightsail:GetRelationalDatabases",
+        "efs:DescribeFileSystems",
+        "efs:DescribeMountTargets",
+        "fsx:DescribeFileSystems",
+        "ecr:DescribeRepositories",
+        "ecr:DescribeImages"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "SentinelMessagingAndIntegrationReadAccess",
+      "Effect": "Allow",
+      "Action": [
+        "sqs:ListQueues",
+        "sqs:GetQueueAttributes",
+        "sns:ListTopics",
+        "sns:GetTopicAttributes",
+        "kinesis:ListStreams",
+        "kinesis:DescribeStreamSummary",
+        "sfn:ListStateMachines",
+        "sfn:DescribeStateMachine",
+        "apigateway:GET"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "SentinelNetworkAndDNSReadAccess",
+      "Effect": "Allow",
+      "Action": [
+        "route53:ListHostedZones",
+        "route53:GetHostedZone",
+        "cloudfront:ListDistributions"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "SentinelDataAndAnalyticsReadAccess",
+      "Effect": "Allow",
+      "Action": [
+        "athena:ListWorkGroups",
+        "athena:GetWorkGroup",
+        "glue:GetJobs",
+        "glue:GetJobRuns",
+        "glue:GetCrawlers",
+        "dms:DescribeReplicationInstances",
+        "dms:DescribeReplicationTasks"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "SentinelMiscServiceReadAccess",
+      "Effect": "Allow",
+      "Action": [
+        "codepipeline:ListPipelines",
+        "codepipeline:GetPipelineState",
+        "grafana:ListWorkspaces",
+        "transfer:ListServers",
+        "transfer:DescribeServer"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "SentinelPricingAndReservations",
+      "Effect": "Allow",
+      "Action": [
+        "pricing:GetProducts",
+        "pricing:DescribeServices",
+        "savingsplans:DescribeSavingsPlans",
+        "sts:GetCallerIdentity"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "SentinelBedrockAI",
+      "Effect": "Allow",
+      "Action": [
+        "bedrock:ListFoundationModels",
+        "bedrock-runtime:InvokeModel"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
