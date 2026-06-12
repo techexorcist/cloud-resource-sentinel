@@ -10,14 +10,14 @@ Cloud Resource Sentinel scans AWS accounts to surface idle resources, security g
 
 | Page | What it covers |
 |------|----------------|
-| [[Architecture]] | System layers, request flow, key design decisions |
-| [[Read-Only Security Guardrails]] | The 4-layer system that makes mutation impossible |
-| [[Pricing Architecture]] | How costs are calculated, regional rates, caching |
-| [[Resource Scanners]] | All 50 scanners and their cost logic |
-| [[Configuration Reference]] | Every tunable property and environment variable |
-| [[API Reference]] | REST endpoints |
-| [[Troubleshooting]] | Common startup and runtime issues |
-| [[FAQ]] | Frequently asked questions |
+| [Architecture](Architecture.md) | System layers, request flow, key design decisions |
+| [Read-Only Security Guardrails](Read-Only-Security-Guardrails.md) | The 4-layer system that makes mutation impossible |
+| [Pricing Architecture](Pricing-Architecture.md) | How costs are calculated, regional rates, caching |
+| [Resource Scanners](Resource-Scanners.md) | All 50 scanners and their cost logic |
+| [Configuration Reference](Configuration-Reference.md) | Every tunable property and environment variable |
+| [API Reference](API-Reference.md) | REST endpoints |
+| [Troubleshooting](Troubleshooting.md) | Common startup and runtime issues |
+| [FAQ](FAQ.md) | Frequently asked questions |
 
 ## At a glance
 

@@ -24,7 +24,7 @@ Every finding carries:
 
 - **FindingType** — `COST`, `SECURITY`, or `GOVERNANCE`
 - **Severity** — `INFO` → `LOW` → `MEDIUM` → `HIGH` → `CRITICAL`
-- **Estimated monthly cost** (via [[Pricing Architecture]])
+- **Estimated monthly cost** (via [Pricing Architecture](Pricing-Architecture.md))
 - **An advisory recommendation** (via the Recommendation Engine)
 
 ## Recommendation Engine

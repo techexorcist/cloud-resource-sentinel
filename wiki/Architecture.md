@@ -62,7 +62,7 @@ Progress is bounded to phase ranges: scanning 10–60%, AI 70–89%, saving 90%,
 | **Spring AI `ChatModel`** | One interface for Ollama and Bedrock; swap by config |
 | **Server-side narratives** | Deterministic, model-agnostic numbers; immune to hallucination |
 | **Centralized pricing** | No scanner hardcodes rates; regional overrides are one JSON edit |
-| **Read-only by design** | 4 independent guardrail layers (see [[Read-Only Security Guardrails]]) |
+| **Read-only by design** | 4 independent guardrail layers (see [Read-Only Security Guardrails](Read-Only-Security-Guardrails.md)) |
 | **Prefix-based actionability** | `startsWith()` matching avoids false positives like "Review - Delete Failed" |
 
 ## Data integrity

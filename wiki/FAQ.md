@@ -2,7 +2,7 @@
 
 ### Can this tool delete or modify my AWS resources?
 
-**No — by design, and it's enforced four independent ways.** A runtime SDK interceptor blocks every non-read API call, a centralized factory ensures that interceptor is always attached, an architecture test fails the build if any code bypasses the factory, and the AI prompt is constrained to advisory language only. See [[Read-Only Security Guardrails]].
+**No — by design, and it's enforced four independent ways.** A runtime SDK interceptor blocks every non-read API call, a centralized factory ensures that interceptor is always attached, an architecture test fails the build if any code bypasses the factory, and the AI prompt is constrained to advisory language only. See [Read-Only Security Guardrails](Read-Only-Security-Guardrails.md).
 
 ### What AWS permissions does it need?
 
@@ -14,19 +14,19 @@ No. The default AI provider is **Ollama**, which runs locally and is free and op
 
 ### Are the cost and savings numbers from the AI?
 
-No. All cost narratives, risk overviews, and summary statistics are computed **in Java** by `PromptBuilder`. The AI only provides interpretive recommendations. This makes the numbers deterministic, model-agnostic, and immune to hallucination. See [[Architecture]].
+No. All cost narratives, risk overviews, and summary statistics are computed **in Java** by `PromptBuilder`. The AI only provides interpretive recommendations. This makes the numbers deterministic, model-agnostic, and immune to hallucination. See [Architecture](Architecture.md).
 
 ### How accurate is the pricing?
 
-Pricing first tries the live **AWS Pricing API** (cached 24h), then falls back to a per-region JSON rate table covering 30 regions. Estimates are intended for relative comparison and prioritization, not billing-grade precision. See [[Pricing Architecture]].
+Pricing first tries the live **AWS Pricing API** (cached 24h), then falls back to a per-region JSON rate table covering 30 regions. Estimates are intended for relative comparison and prioritization, not billing-grade precision. See [Pricing Architecture](Pricing-Architecture.md).
 
 ### Which resources does it scan?
 
-50 scanners — 39 cost/idle and 11 security/governance — across compute, storage, database, networking, and security services. See [[Resource Scanners]] for the full list.
+50 scanners — 39 cost/idle and 11 security/governance — across compute, storage, database, networking, and security services. See [Resource Scanners](Resource-Scanners.md) for the full list.
 
 ### Can I add a scanner for a service that isn't covered?
 
-Yes. Implement `ResourceScanner`, build clients via `ReadOnlyAwsClientFactory`, route costs through `PricingService`, and add a regional rate to `regional-pricing.json`. The "Adding a new scanner" section of [[Resource Scanners]] has the checklist.
+Yes. Implement `ResourceScanner`, build clients via `ReadOnlyAwsClientFactory`, route costs through `PricingService`, and add a regional rate to `regional-pricing.json`. The "Adding a new scanner" section of [Resource Scanners](Resource-Scanners.md) has the checklist.
 
 ### Does it support clouds other than AWS?
 
@@ -38,7 +38,7 @@ One scan runs at a time (to avoid overloading the AI model); up to 7 individual 
 
 ### Can I schedule scans automatically?
 
-Yes — disabled by default. Enable `cloud-sentinel.scheduled-scan.enabled=true` and set the cron, category, and AI provider. See [[Configuration Reference]].
+Yes — disabled by default. Enable `cloud-sentinel.scheduled-scan.enabled=true` and set the cron, category, and AI provider. See [Configuration Reference](Configuration-Reference.md).
 
 ### How do I prove the read-only guardrail is actually working?
 
@@ -46,7 +46,7 @@ Hit `/actuator/blocked-operations` — it audits any mutating AWS call the inter
 
 ### It won't start / the AI errors out. Where do I look?
 
-See [[Troubleshooting]] — it covers port conflicts, the `./mvnw` permission issue, Ollama "connection refused", AWS region/credential warnings, and AI timeouts.
+See [Troubleshooting](Troubleshooting.md) — it covers port conflicts, the `./mvnw` permission issue, Ollama "connection refused", AWS region/credential warnings, and AI timeouts.
 
 ### Is my data sent anywhere?
 
