@@ -4,7 +4,7 @@
 
 ```bash
 # Prerequisites: Java 21, Maven, Docker (for Ollama)
-git clone <repo-url>
+git clone https://github.com/techexorcist/cloud-resource-sentinel.git
 cd cloud-resource-sentinel
 ./mvnw clean test          # Run all tests (402)
 ./mvnw spring-boot:run     # Start locally (port 8000)
