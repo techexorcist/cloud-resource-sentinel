@@ -5,7 +5,7 @@ sections:
     type: code
     language: bash
     content: |
-      git clone <repo-url>
+      git clone https://github.com/techexorcist/cloud-resource-sentinel.git
       cd cloud-resource-sentinel
 
       # Native run
