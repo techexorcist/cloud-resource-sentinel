@@ -27,7 +27,7 @@ Choose one of the two setup options below.
 ### Option A: Docker (recommended)
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/techexorcist/cloud-resource-sentinel.git
 cd cloud-resource-sentinel
 
 # Start both services (Ollama AI + backend)
@@ -99,7 +99,7 @@ aws sts get-caller-identity
 #### 4. Build and run
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/techexorcist/cloud-resource-sentinel.git
 cd cloud-resource-sentinel
 
 # Build (skip tests for faster startup)
